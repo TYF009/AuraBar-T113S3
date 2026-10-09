@@ -1,0 +1,20 @@
+Copyright (c) 2026 TYF009 (AuraBar)
+
+This hardware design — the LCEDA Pro project (.eprj2), schematic sheets,
+DXF exports, netlist, BOM, and the hardware design guide and its figures —
+is licensed under the CERN Open Hardware Licence Version 2 - Strongly
+Reciprocal (CERN-OHL-S-2.0).
+
+Full licence text:
+  https://ohwr.org/cern_ohl_s_v2.txt
+  https://cern-ohl.web.cern.ch/home/licenses (CERN-OHL-S-2.0)
+
+You are free to use, study, make, modify and redistribute this design,
+provided you (among other obligations) keep the same licence, attribute
+the original design, make available the sources of derivative designs,
+and retain all copyright and notice markings. See the licence for the
+complete terms.
+
+THE HARDWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. Build and
+use it at your own risk; verify all power, DDR, audio/EMI and safety
+related circuitry before production.

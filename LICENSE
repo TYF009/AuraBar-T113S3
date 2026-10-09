@@ -1,0 +1,32 @@
+AuraBar — Copyright (c) 2026 TYF009
+
+This repository is released under multiple licenses, chosen per component:
+
+1. HARDWARE DESIGN FILES (hardware/)
+   The hardware design — including the LCEDA Pro project, schematics,
+   DXF exports, netlist, BOM, and hardware documentation/figures — is
+   licensed under the CERN Open Hardware Licence Version 2, Strongly
+   Reciprocal (CERN-OHL-S-2.0).
+   See hardware/LICENSE for the notice and:
+   https://ohwr.org/cern_ohl_s_v2.txt
+   https://cern-ohl.web.cern.ch/
+
+2. DOCUMENTATION (docs/, README files, Markdown guides)
+   Documentation is licensed under the Creative Commons Attribution-
+   ShareAlike 4.0 International License (CC BY-SA 4.0).
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+3. SOFTWARE (software/)
+   Software and firmware source code (to be added) are licensed under
+   the MIT License. See software/LICENSE.
+   https://opensource.org/license/mit/
+
+Component trademarks (Allwinner, Winbond, Realtek, Silergy, LCEDA/JLC,
+etc.) belong to their respective owners. Reference designs and
+third-party tools mentioned in this repository remain under their own
+terms.
+
+Unless required by applicable law or agreed to in writing, the hardware
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ANY KIND, either express or implied. See the applicable license for the
+specific language governing permissions and limitations.
