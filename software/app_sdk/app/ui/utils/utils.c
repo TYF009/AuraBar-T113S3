@@ -11,54 +11,19 @@
 #include "lvgl.h"
 #include "utils.h"
 
-static char time[20];
+static char time[32];
 
-/**
- * 返回分钟转换的小时、分钟字符串 单位数补0
- */
-char *get_time_str(int time_min){
-    memset(time,'\0',sizeof(time));
-    int time_h = time_min / 60;
-    int time_m = time_min % 60;
-    if(time_h >= 10){
-        if(time_m >= 10){
-            sprintf(time,"%d:%d",time_h,time_m);
-        }else{
-            sprintf(time,"%d:0%d",time_h,time_m);
-        }
-    }else{
-        if(time_m >= 10){
-            sprintf(time,"0%d:%d",time_h,time_m);
-        }else{
-            sprintf(time,"0%d:0%d",time_h,time_m);
-        }
-    }
-    return time;
-}   
-
-/**
- * 返回分钟转换的小时、分钟字符串 单位数补0
- */
-char *get_time_str_nosymbol(int time_min){
-    memset(time,'\0',sizeof(time));
-    int time_h = time_min / 60;
-    int time_m = time_min % 60;
-    if(time_h >= 10){
-        if(time_m >= 10){
-            sprintf(time,"%d#000000 :#%d",time_h,time_m);
-        }else{
-            sprintf(time,"%d#000000 :#0%d",time_h,time_m);
-        }
-    }else{
-        if(time_m >= 10){
-            sprintf(time,"0%d#000000 :#%d",time_h,time_m);
-        }else{
-            sprintf(time,"0%d#000000 :#0%d",time_h,time_m);
-        }
-    }
+char *get_time_str(int time_min) {
+    if(time_min<0)time_min=0;
+    snprintf(time,sizeof(time),"%02d:%02d",time_min/60,time_min%60);
     return time;
 }
 
+char *get_time_str_nosymbol(int time_min) {
+    if(time_min<0)time_min=0;
+    snprintf(time,sizeof(time),"%02d#000000 :#%02d",time_min/60,time_min%60);
+    return time;
+}
 
 static volatile sig_atomic_t exit_requested;
 static void signal_callback_func(int sig_no) { (void)sig_no; exit_requested = 1; }
