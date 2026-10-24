@@ -10,6 +10,9 @@ touch, storage and audio base; each edition has its own version and release asse
 | Connected Desktop | Planned | PC companion and live information cards |
 
 Start with [Music & Focus](app_sdk/README.md).
+![Music page captured from the T113 framebuffer](../docs/software/images/music-focus-board.png)
+
+[Preview acceptance record / 预览版验收记录](../docs/software/release-0.2.0-alpha.1.md)
 [Profile metadata](profiles/music-focus.json) explicitly distinguishes application
 upgrade packages from bootable firmware images.
 

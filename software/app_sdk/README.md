@@ -42,6 +42,7 @@ Build type defaults to RelWithDebInfo; AURABAR_BUILD_TYPE=Release selects a rele
 ~~~sh
 bash tests/run.sh
 python3 scripts/package.py --platform t113 --version 0.2.0-alpha.1
+python3 scripts/verify_package.py dist/aurabar-music-focus-0.2.0-alpha.1-t113.tar.gz
 ~~~
 
 Tests use ALSA null; they do not prove speaker quality.
