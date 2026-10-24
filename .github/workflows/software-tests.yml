@@ -1,0 +1,17 @@
+name: Software regression tests
+on:
+  push:
+    paths: ['software/**', '.github/workflows/software-tests.yml']
+  pull_request:
+    paths: ['software/**', '.github/workflows/software-tests.yml']
+permissions:
+  contents: read
+jobs:
+  native-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential pkg-config libcurl4-openssl-dev libasound2t64 ffmpeg
+      - name: Run storage, queue, countdown and music regressions
+        run: bash software/app_sdk/tests/run.sh

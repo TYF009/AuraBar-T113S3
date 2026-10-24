@@ -1,27 +1,28 @@
-# Software (coming soon / 软件部分待补充)
+# AuraBar software editions
 
-**EN**
+The hardware and enclosure are fixed. Software editions share the same display,
+touch, storage and audio base; each edition has its own version and release assets.
 
-This directory will contain the AuraBar software stack:
+| Edition | Status | Contents |
+|---|---|---|
+| Music & Focus | 0.2.0-alpha.1 preview | Music, procedural ambient sound, focus tools |
+| AI Assistant | Planned | Voice/text interaction and approved device actions |
+| Connected Desktop | Planned | PC companion and live information cards |
 
-- Linux BSP for the Allwinner T113-S3 (Tina Linux / Buildroot, U-Boot, kernel, rootfs)
-- MIPI DSI panel (280×1424) and GT911 I2C touch bring-up
-- Desktop-assistant application: clock, weather, Pomodoro timer
-- Audio (MIC / speaker), volume and screen-off control
-- RTL8723DS Wi-Fi/BT drivers; optional BLE-Mesh central control
-- Future: mini-games, USB HID shortcut keys
+Start with [Music & Focus](app_sdk/README.md).
+[Profile metadata](profiles/music-focus.json) explicitly distinguishes application
+upgrade packages from bootable firmware images.
 
-Hardware is ready in [`../hardware/`](../hardware/); see the root [README](../README.md) for FEL burning instructions.
+## Release policy
 
-**中文**
+- Every tested edition receives an immutable version/tag and checksummed assets.
+- A preview is not described as production-ready.
+- The present deliverable is an **application upgrade**, used with the existing,
+  tested Tina Linux base. It does not replace the bootloader or device tree.
+- Complete flashable images require the matching BSP, kernel/device-tree sources
+  and image packaging project; those are not included in this repository yet.
+- Existing versions remain available so visitors can choose an edition.
+- User data is kept outside the read-only asset directory.
 
-本目录后续将包含 AuraBar 软件部分：
-
-- 全志 T113-S3 的 Linux BSP（Tina Linux / Buildroot，含 U-Boot、内核、rootfs）
-- MIPI DSI 屏（280×1424）与 GT911 I2C 触摸适配
-- 桌面助理应用：时钟、天气、番茄钟
-- 音频（MIC/喇叭）、音量与熄屏控制
-- RTL8723DS WiFi/蓝牙驱动；可选 BLE Mesh 中控
-- 后续：小游戏、USB HID 快捷键
-
-硬件部分已就绪，见 [`../hardware/`](../hardware/)；FEL 烧录方法见根目录 [README](../README.md)。
+中文：当前先开发音乐与专注版本。源码、应用升级包与完整系统镜像会明确区分，
+未经实机验证的功能不会标成已完成；后续版本保留下载和回退说明。

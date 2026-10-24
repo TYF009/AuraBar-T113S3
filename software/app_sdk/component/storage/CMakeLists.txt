@@ -1,0 +1,8 @@
+add_library(storage STATIC file_save.c)
+target_include_directories(storage PUBLIC .)
+target_link_libraries(storage PUBLIC pthread)
+if(SIMULATOR_LINUX)
+    target_compile_definitions(storage PRIVATE PROJECT_RES_URL="${CMAKE_BINARY_DIR}/app/res/" PROJECT_DATA_URL="${CMAKE_BINARY_DIR}/app/data/")
+else()
+    target_compile_definitions(storage PRIVATE PROJECT_RES_URL="/usr/res/" PROJECT_DATA_URL="/usr/var/lib/aurabar/")
+endif()
