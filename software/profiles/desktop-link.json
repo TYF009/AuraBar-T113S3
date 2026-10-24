@@ -1,0 +1,12 @@
+{
+  "id": "desktop-link",
+  "name": "AuraBar Desktop Link",
+  "version": "0.3.0-alpha.1",
+  "status": "preview",
+  "artifact_kind": "application-upgrade",
+  "bootable_image": false,
+  "hardware": "AuraBar T113-S3 v1.0",
+  "base_features": "Music & Focus application services",
+  "features": ["real-task-status", "bounded-task-history", "result-details", "completion-notification", "usb-companion", "authenticated-http-client", "heartbeat-staleness", "reconnection"],
+  "not_in_this_preview": ["ai-model", "remote-command-execution", "screen-task-cancellation", "persistent-task-database", "automatic-boot-configuration"]
+}

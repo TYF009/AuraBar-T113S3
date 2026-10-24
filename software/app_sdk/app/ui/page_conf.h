@@ -34,6 +34,7 @@ void delete_current_page(lv_style_t *style);
 void init_page_main(void);
 void init_page_todo(void);
 void init_page_music(void);
+void init_page_tasks(void);
 void init_page_linkage(void);
 void init_page_linkage_setting(SETTING_PARAM_TYPE_E type);
 void init_page_warn(WRANING_TYPE_E type);

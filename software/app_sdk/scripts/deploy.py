@@ -13,7 +13,8 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--adb', default='adb')
 parser.add_argument('--serial', required=True)
-parser.add_argument('--version', default='0.2.0-alpha.1')
+parser.add_argument('--version', default='0.3.0-alpha.1')
+parser.add_argument('--profile', choices=('desktop-link',), default='desktop-link')
 parser.add_argument('--binary', type=Path)
 args = parser.parse_args()
 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,63}', args.version):
@@ -27,7 +28,7 @@ def shell(command):
     return subprocess.check_output(adb + ['shell', command], text=True).strip()
 if shell('id -u') != '0':
     parser.error('The verified Tina development image must provide root ADB')
-target = '/usr/bin/aurabar-music-focus-' + args.version
+target = '/usr/bin/aurabar-' + args.profile + '-' + args.version
 quoted = shlex.quote(target)
 if shell('test -e ' + quoted + ' && echo exists || echo missing') == 'exists':
     parser.error('Version already installed. Stop it and use a new version name; never overwrite a running executable.')
@@ -42,5 +43,5 @@ shell('chmod 755 ' + quoted)
 print(shell(quoted + ' --version'))
 print('Verified SHA256: ' + digest)
 print('Installed alongside /usr/bin/demo. Boot configuration is unchanged.')
-print('Stop the currently running UI before starting: ' + target + ' --music')
+print('Stop the currently running UI before starting: ' + target + (' --tasks' if args.profile == 'desktop-link' else ' --music'))
 print('Rollback: stop this version, then start /usr/bin/demo from /usr/bin.')

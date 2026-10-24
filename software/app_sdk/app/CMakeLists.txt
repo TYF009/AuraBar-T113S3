@@ -50,6 +50,7 @@ target_link_libraries(demo PRIVATE
                         font
                         usb_hid
                         music
+                        task_status
                         storage
                         )
 
