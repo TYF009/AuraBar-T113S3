@@ -11,8 +11,23 @@ static lv_obj_t *rows[TASK_LIMIT],*row_labels[TASK_LIMIT];
 static lv_obj_t *card_tabs[3];
 static lv_timer_t *timer;
 static char selected[64];
+static char displayed_ids[TASK_LIMIT][64];
 static int follow_latest=1;
 static int card_view;
+static void refresh(lv_timer_t *unused);
+static void set_text(lv_obj_t *obj,const char *text) {
+    if(strcmp(lv_label_get_text(obj),text))lv_label_set_text(obj,text);
+}
+static void set_background(lv_obj_t *obj,lv_color_t color) {
+    if(lv_obj_get_style_bg_color(obj,0).full!=color.full)lv_obj_set_style_bg_color(obj,color,0);
+}
+static void set_color(lv_obj_t *obj,lv_color_t color) {
+    if(lv_obj_get_style_text_color(obj,0).full!=color.full)lv_obj_set_style_text_color(obj,color,0);
+}
+static void set_hidden(lv_obj_t *obj,int hide) {
+    if(hide && !lv_obj_has_flag(obj,LV_OBJ_FLAG_HIDDEN))lv_obj_add_flag(obj,LV_OBJ_FLAG_HIDDEN);
+    else if(!hide && lv_obj_has_flag(obj,LV_OBJ_FLAG_HIDDEN))lv_obj_clear_flag(obj,LV_OBJ_FLAG_HIDDEN);
+}
 static const char *state_name(task_state state) {
     switch(state) {
         case TASK_RUNNING:return "Running";
@@ -37,15 +52,16 @@ static void deleted(lv_event_t *e) {
 }
 static void navigate(lv_event_t *e) {
     intptr_t action=(intptr_t)lv_event_get_user_data(e);
-    if(action>=3) { card_view=(int)action-3;return; }
-    if(action==2) { follow_latest=1;return; }
+    if(action>=3) { card_view=(int)action-3;refresh(NULL);return; }
+    if(action==2) { follow_latest=1;refresh(NULL);return; }
     lv_obj_clean(lv_scr_act());
     if(action==1)init_page_music();else init_page_main();
 }
 static void select_row(lv_event_t *e) {
-    task_snapshot s;task_status_snapshot(&s);
     int index=(int)(intptr_t)lv_event_get_user_data(e);
-    if(index<s.count) { snprintf(selected,sizeof(selected),"%s",s.tasks[index].id);follow_latest=0; }
+    if(index>=0 && index<TASK_LIMIT && displayed_ids[index][0]) {
+        snprintf(selected,sizeof(selected),"%s",displayed_ids[index]);follow_latest=0;refresh(NULL);
+    }
 }
 static lv_obj_t *button_at(const char *text,int x,int y,int width,int height,intptr_t action) {
     lv_obj_t *b=lv_btn_create(root);lv_obj_set_pos(b,x,y);lv_obj_set_size(b,width,height);
@@ -66,9 +82,9 @@ static void refresh(lv_timer_t *unused) {
     (void)unused;if(!root)return;
     task_snapshot s;task_status_snapshot(&s);
     for(int i=0;i<3;++i)
-        lv_obj_set_style_bg_color(card_tabs[i],lv_color_hex(i==card_view?0x32658d:0x183d60),0);
-    lv_label_set_text(connection,s.message);
-    lv_obj_set_style_text_color(connection,lv_color_hex(s.connected?0x48d8ad:0xffce80),0);
+        set_background(card_tabs[i],lv_color_hex(i==card_view?0x32658d:0x183d60));
+    set_text(connection,s.message);
+    set_color(connection,lv_color_hex(s.connected?0x48d8ad:0xffce80));
     int current=-1;
     for(int i=0;i<s.count;++i)if(!strcmp(selected,s.tasks[i].id))current=i;
     if(follow_latest||current<0) {
@@ -77,34 +93,36 @@ static void refresh(lv_timer_t *unused) {
         if(current>=0)snprintf(selected,sizeof(selected),"%s",s.tasks[current].id);
     }
     for(int i=0;i<TASK_LIMIT;++i) {
-        if(i>=s.count) { lv_obj_add_flag(rows[i],LV_OBJ_FLAG_HIDDEN);continue; }
-        lv_obj_clear_flag(rows[i],LV_OBJ_FLAG_HIDDEN);
+        if(i>=s.count) { set_hidden(rows[i],1);displayed_ids[i][0]=0;continue; }
+        set_hidden(rows[i],0);
+        snprintf(displayed_ids[i],sizeof(displayed_ids[i]),"%s",s.tasks[i].id);
         char text[180];snprintf(text,sizeof(text),"%s  |  %s",state_name(s.tasks[i].state),s.tasks[i].title);
-        lv_label_set_text(row_labels[i],text);
-        lv_obj_set_style_bg_color(rows[i],lv_color_hex(i==current?0x214c73:0x102b45),0);
+        set_text(row_labels[i],text);
+        set_background(rows[i],lv_color_hex(i==current?0x214c73:0x102b45));
     }
-    lv_label_set_text(notice,s.connected?"Read the card, then review code and approvals on your computer.":"Offline: the last received result may be out of date.");
+    set_text(notice,s.connected?"Read the card, then review code and approvals on your computer.":"Offline: the last received result may be out of date.");
     if(current<0) {
-        lv_label_set_text(title,"Ready for your next coding task");
-        lv_label_set_text(stage,"Waiting for companion");
+        set_text(title,"Ready for your next coding task");
+        set_text(stage,"Waiting for companion");
         card_text("Start Codex from the desktop companion. Actual task events and a review card will appear here.");
-        lv_label_set_text(timing,"No task received");lv_obj_add_flag(progress,LV_OBJ_FLAG_HIDDEN);return;
+        set_text(timing,"No task received");set_hidden(progress,1);return;
     }
     task_item *t=&s.tasks[current];
-    lv_label_set_text(title,t->title);lv_label_set_text(stage,t->stage);
-    lv_obj_set_style_text_color(stage,state_color(t->state),0);
+    set_text(title,t->title);set_text(stage,t->stage);
+    set_color(stage,state_color(t->state));
     if(card_view==1)card_text(t->evidence[0]?t->evidence:"No command evidence was supplied. A completion message alone does not verify tests.");
     else if(card_view==2)card_text(t->next_step[0]?t->next_step:"Review the task result on your computer.");
     else card_text(t->detail);
     char status[160];
     if(t->progress<0)snprintf(status,sizeof(status),"%s  |  %u:%02u elapsed  |  Percentage unavailable",state_name(t->state),t->elapsed_seconds/60,t->elapsed_seconds%60);
     else snprintf(status,sizeof(status),"%s  |  %u:%02u elapsed  |  %d%%",state_name(t->state),t->elapsed_seconds/60,t->elapsed_seconds%60,t->progress);
-    lv_label_set_text(timing,status);
-    if(t->progress<0)lv_obj_add_flag(progress,LV_OBJ_FLAG_HIDDEN);
-    else { lv_obj_clear_flag(progress,LV_OBJ_FLAG_HIDDEN);lv_bar_set_value(progress,t->progress,LV_ANIM_OFF); }
+    set_text(timing,status);
+    set_hidden(progress,t->progress<0);
+    if(t->progress>=0 && lv_bar_get_value(progress)!=t->progress)lv_bar_set_value(progress,t->progress,LV_ANIM_OFF);
 }
 void init_page_tasks(void) {
     selected[0]=0;follow_latest=1;card_view=0;
+    memset(displayed_ids,0,sizeof(displayed_ids));
     root=lv_obj_create(lv_scr_act());lv_obj_set_pos(root,0,0);lv_obj_set_size(root,LV_PCT(100),LV_PCT(100));
     lv_obj_clear_flag(root,LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(root,lv_color_hex(0x071626),0);lv_obj_set_style_border_width(root,0,0);
@@ -130,6 +148,7 @@ void init_page_tasks(void) {
     detail_box=lv_obj_create(root);lv_obj_set_pos(detail_box,405,143);lv_obj_set_size(detail_box,985,66);
     lv_obj_set_style_bg_opa(detail_box,LV_OPA_TRANSP,0);lv_obj_set_style_border_width(detail_box,0,0);
     lv_obj_set_style_pad_all(detail_box,0,0);lv_obj_set_scroll_dir(detail_box,LV_DIR_VER);
+    lv_obj_clear_flag(detail_box,LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_CHAIN_VER);
     detail=label(detail_box,"",0,0,965,18);lv_label_set_long_mode(detail,LV_LABEL_LONG_WRAP);
     timing=label(root,"",405,214,985,17);
     progress=lv_bar_create(root);lv_obj_set_pos(progress,405,233);lv_obj_set_size(progress,985,5);

@@ -40,8 +40,9 @@ covered by regression tests; the earlier task was not retroactively rewritten.
 
 ## Pending acceptance / 待验收
 
-- Physical taps through Summary / Evidence / Next and long-text scrolling still need
-  the owner's confirmation. Framebuffer inspection is not a touch-path test.
+- The owner confirmed all three tabs and long-text scrolling work, but reported
+  choppy scrolling. Alpha.2 addresses redundant UI updates; performance acceptance
+  remains separate from this functional confirmation.
 - Recheck terminal notification audio during music, followed by music recovery.
 - Resolve the computer's Codex sandbox permission issue before claiming project-file
   reading, command execution or actual test-suite integration on this machine.

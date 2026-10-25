@@ -10,7 +10,7 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--platform", choices=("linux", "t113"), required=True)
-parser.add_argument("--version", default="0.4.0-alpha.1")
+parser.add_argument("--version", default="0.4.0-alpha.2")
 parser.add_argument("--profile", choices=("coding-companion",), default="coding-companion")
 parser.add_argument("--output", type=Path, default=Path("dist"))
 args = parser.parse_args()

@@ -18,7 +18,7 @@ static uint32_t time_till_next = 1;
 
 int main(int argc, char **argv) {
     if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-        puts("AuraBar Coding Companion 0.4.0-alpha.1");
+        puts("AuraBar Coding Companion 0.4.0-alpha.2");
         return 0;
     }
     if (argc > 2 || (argc > 1 && strcmp(argv[1], "--music") != 0 && strcmp(argv[1], "--tasks") != 0)) {

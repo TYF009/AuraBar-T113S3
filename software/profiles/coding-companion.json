@@ -1,7 +1,7 @@
 {
   "id": "coding-companion",
   "name": "AuraBar Coding Companion",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "status": "preview",
   "artifact_kind": "application-upgrade",
   "bootable_image": false,

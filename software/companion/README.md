@@ -1,4 +1,4 @@
-# AuraBar Coding Companion — 0.4.0-alpha.1
+# AuraBar Coding Companion — 0.4.0-alpha.2
 
 A small Python 3.10+ service that reports actual command/task state to AuraBar.
 Only the Python standard library is required. The device keeps its native LVGL UI.
@@ -30,7 +30,7 @@ then start on the board from /usr/bin:
 
 ~~~sh
 export AURABAR_TASK_FILE=/tmp/aurabar-tasks.json
-/usr/bin/aurabar-coding-companion-0.4.0-alpha.1 --tasks
+/usr/bin/aurabar-coding-companion-0.4.0-alpha.2 --tasks
 ~~~
 
 Keep one display application running. The installer preserves /usr/bin/demo and

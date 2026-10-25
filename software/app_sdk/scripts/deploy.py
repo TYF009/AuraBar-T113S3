@@ -13,7 +13,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--adb', default='adb')
 parser.add_argument('--serial', required=True)
-parser.add_argument('--version', default='0.4.0-alpha.1')
+parser.add_argument('--version', default='0.4.0-alpha.2')
 parser.add_argument('--profile', choices=('coding-companion',), default='coding-companion')
 parser.add_argument('--binary', type=Path)
 args = parser.parse_args()
