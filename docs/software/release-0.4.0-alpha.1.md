@@ -1,6 +1,6 @@
-# Coding Companion 0.4.0-alpha.1 — development acceptance record
+# Coding Companion 0.4.0-alpha.1 — preview acceptance record
 
-Date: 2026-10-25. This is a source preview, not a completed hardware release.
+Date: 2026-10-25. This is an application preview with the remaining checks listed below.
 The Music & Focus 0.2 and Desktop Link 0.3 iterations remain on their existing branches.
 
 ## Delivered source
@@ -40,14 +40,41 @@ covered by regression tests; the earlier task was not retroactively rewritten.
 
 ## Pending acceptance / 待验收
 
-- The VMware Ubuntu build environment was not running during this iteration.
-  Restart the existing vm-build-worker.py to run native C regressions and build T113.
-- The board is still running the preserved Desktop Link 0.3 executable. Do not claim
-  the 0.4 tabs, scrolling or full touch path have been verified on it.
-- Build and verify the matching 0.4 archive before creating a downloadable release asset.
+- Physical taps through Summary / Evidence / Next and long-text scrolling still need
+  the owner's confirmation. Framebuffer inspection is not a touch-path test.
 - Recheck terminal notification audio during music, followed by music recovery.
 - Resolve the computer's Codex sandbox permission issue before claiming project-file
   reading, command execution or actual test-suite integration on this machine.
+
+## Ubuntu build, real board and package
+
+The VMware runtime share was re-enabled and mounted in Ubuntu; the owner restarted
+the existing build helper. The full Ubuntu regression job coding-04-tests-01 exited
+zero, including all 13 Python tests, native task model/HTTP worker/music tests, and
+ARM test executable compilation. The new task-model executable also passed on T113.
+
+A fresh RelWithDebInfo T113 build (coding-04-build-01) exited zero. The 4,734,664-byte
+binary was installed at /usr/bin/aurabar-coding-companion-0.4.0-alpha.1 and returned
+the correct version. Host and device SHA256 both matched:
+
+```text
+b10243bbea4a45a2aa9138a964e80333cc3ba38b71605298c3b6dc6065747de7
+```
+
+The old display process was stopped and the new app started with --tasks and the
+existing USB snapshot path. Framebuffer inspection showed Coding Companion, all
+three tabs, a connected heartbeat, Chinese AI summary text and its scroll bar.
+Original /usr/bin/demo, the 0.2/0.3 executables and boot configuration were preserved.
+
+![Actual T113 framebuffer: Coding Companion summary](images/coding-summary-board.png)
+
+The archive aurabar-coding-companion-0.4.0-alpha.1-t113.tar.gz passed verification of
+all 142 manifest files, including the adapter, schema and sample prompt. It is an
+application upgrade, not a bootable firmware image. Archive SHA256:
+
+```text
+0c86230fc2f42b2b398ad83f4ed8dd034dd865e27605afe21b51b203acd8d412
+```
 
 ## Scope limits
 

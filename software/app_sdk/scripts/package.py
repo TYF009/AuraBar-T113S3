@@ -30,6 +30,7 @@ with tempfile.TemporaryDirectory() as temporary:
     (stage / "companion").mkdir()
     for filename in ("aurabar_companion.py", "codex_link.py", "codex_result.schema.json", "README.md"):
         shutil.copyfile(root.parent / "companion" / filename, stage / "companion" / filename)
+    shutil.copytree(root.parent / "companion" / "examples", stage / "companion" / "examples")
     for source, notice_name in ((root.parent / "LICENSE", "AuraBar-MIT.txt"),
                          (root / "lvgl/LICENCE.txt", "LVGL-MIT.txt"),
                          (root / "third_party/minimp3/LICENSE", "minimp3-CC0.txt"),
