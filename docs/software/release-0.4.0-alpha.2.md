@@ -40,11 +40,15 @@ The earlier full Ubuntu regression, ARM model test, real Codex result and USB
 delivery records remain in alpha.1's acceptance document. The adapter, task protocol
 and audio backend are unchanged in this update. GitHub checks cover the updated source.
 
-## Remaining acceptance
+## Physical confirmation and remaining acceptance
 
-- The owner has been asked to compare scrolling on alpha.2; feedback is pending.
-- Ambient sound was audible on alpha.1, but notification interruption and recovery
-  still need physical confirmation after the restart.
+- The owner confirmed alpha.2 is noticeably smoother when switching tabs and scrolling.
+- The owner confirmed ambient playback starts normally and then deliberately paused it.
+  Playback/pause operation is therefore confirmed; this is not a notification-recovery test.
+- Notification interruption and recovery still need physical confirmation. Automated
+  music/notification coordination tests passed in the full Ubuntu regression. This
+  remaining physical check is recorded without requiring another manual test to use
+  the preview's implemented features.
 - The local Codex sandbox-helper permission issue still prevents claiming a verified
   project-file/command-execution workflow. Actual model acceptance used supplied code.
 
