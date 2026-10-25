@@ -1,4 +1,4 @@
-# AuraBar Desktop Link companion — 0.3.0-alpha.1
+# AuraBar Coding Companion — 0.4.0-alpha.1
 
 A small Python 3.10+ service that reports actual command/task state to AuraBar.
 Only the Python standard library is required. The device keeps its native LVGL UI.
@@ -30,7 +30,7 @@ then start on the board from /usr/bin:
 
 ~~~sh
 export AURABAR_TASK_FILE=/tmp/aurabar-tasks.json
-/usr/bin/aurabar-desktop-link-0.3.0-alpha.1 --tasks
+/usr/bin/aurabar-coding-companion-0.4.0-alpha.1 --tasks
 ~~~
 
 Keep one display application running. The installer preserves /usr/bin/demo and
@@ -52,6 +52,54 @@ trees created by that command may require their own cleanup.
 
 ## Report stages from an AI/build adapter
 
+### Codex: real events and a review card
+
+Install the official Codex CLI separately and sign in using its normal login flow.
+Confirm `codex --version` and `codex login status` on the companion computer.
+The adapter reuses that CLI configuration without copying credentials to the board.
+It uses the configured model/provider and account limits; no model is downloaded by AuraBar.
+Only tasks started with this command are tracked; this does not mirror all desktop chats.
+
+Write your task in a UTF-8 file, then keep the service and bridge running:
+
+~~~sh
+python aurabar_companion.py codex --cwd /path/to/trusted-git-project --prompt-file /path/to/task.txt --title "Review current changes"
+~~~
+
+For a small self-contained first demo, use `--prompt-file examples/static-review.txt`
+with a trusted Git project directory. This asks Codex to review supplied code without
+tool execution, and honestly reports that no tests or file modifications took place.
+
+Default sandbox: read-only. For an explicitly intended editing task, add
+`--sandbox workspace-write`. There is no bypass-sandbox option in this adapter.
+`--codex /path/to/codex` selects the executable. Windows users should pass the
+actual `codex.exe` path, not a PowerShell alias or npm `.ps1` shim.
+The adapter leaves model selection and other Codex settings to the user's configuration.
+
+`--output-dir PATH` selects local logs/results (default `~/.aurabar/codex-runs`).
+Each run gets a unique subdirectory with the prompt, raw events, stderr, structured
+Codex output, and result.json. Keep this directory private and outside the public repo.
+The default time limit is 900 seconds; `--timeout 1800` changes it (5..7200).
+Ctrl+C or timeout stops the immediate CLI process; subprocess trees may need cleanup
+on the computer. Do not assume stopping Codex rolls back any file changes.
+
+The Tasks page provides **Summary**, **Evidence** and **Next** tabs. Swipe within
+the text panel to read longer cards. Summary/Next are AI-generated; Evidence shows
+observed command exit counts and separately labels AI verification notes as unverified.
+“Ready for human review” means Codex completed and returned a valid card, not that
+the code has passed testing or been accepted. Review changes and approvals on the computer.
+No live percentage is fabricated and raw command output is not copied to the screen.
+
+Failures, invalid cards, missing terminal events and timeouts show Needs attention/Timed out.
+If the model reports `outcome=blocked`, the device shows Blocked rather than Completed,
+even after a successful CLI exit. The outcome is model-reported and still needs review.
+If the companion disappears after launch, work continues and result.json is saved locally;
+completion reports are not durably queued. Keep the service running throughout a task.
+This is a noninteractive Codex exec integration; approval prompts and screen-side control
+need a future interactive client. [Product scope and evidence rules](../../docs/software/coding-companion.md).
+
+### Generic reporting interface
+
 Choose a fresh id for each task. Keep title and id consistent across updates.
 Only report percentages when the real task supplies them.
 
@@ -61,7 +109,7 @@ python aurabar_companion.py report --id job-2026-001 --title "Document summary" 
 python aurabar_companion.py report --id job-2026-001 --title "Document summary" --state succeeded --stage "Summary ready" --detail "3 decisions and 2 action items" --progress 100
 ~~~
 
-These examples describe an adapter interface; no AI summarization model is bundled.
+These examples describe the generic adapter interface; no AI summarization model is bundled.
 A terminal task cannot be reopened with the same id. The service holds up to eight
 tasks in memory and evicts terminal entries before active ones. Restarting the
 service clears that history; it does not recover tasks already running elsewhere.
@@ -84,12 +132,15 @@ or underscore. Unknown progress is JSON null. Snapshot schema:
   "tasks": [{
     "id": "job-1", "title": "ARM build", "state": "running",
     "stage": "Compiling", "detail": "Building the application",
+    "evidence": "Optional observed command evidence", "next_step": "Optional review action",
     "progress": null, "elapsed_seconds": 32
   }]
 }
 ~~~
 
 States: running, succeeded, failed, cancelled. Newest task starts first in the list.
+Optional evidence and next_step fields accept at most 511 UTF-8 bytes each; omitted
+fields default to empty. Schema 1 remains compatible with the 0.3 reader.
 Elapsed time comes from the computer's monotonic clock and freezes on completion.
 The sample counter changes on each read, including when no task changed.
 The device marks the last snapshot disconnected after five seconds without a
@@ -116,5 +167,6 @@ Native C tests additionally exercise the actual polling worker, HTTP authenticat
 disconnect/reconnect, restart handling and notification deduplication. Tests are in
 ../app_sdk/tests and run in GitHub Actions.
 
-No remote command runner, automatic boot switching, persistent job database,
-task cancellation from the screen, or autonomous AI execution is included.
+No HTTP-triggered command runner, automatic boot switching, persistent job database,
+task cancellation from the screen, or automatic all-chat synchronization is included.
+The Codex task is launched only by the local user's codex subcommand.

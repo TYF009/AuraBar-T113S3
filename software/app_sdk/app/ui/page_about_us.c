@@ -88,7 +88,7 @@ void init_page_about_us()
 
     lv_obj_t *ver = lv_label_create(cont);
     obj_font_set(ver,FONT_TYPE_LETTER, FONT_SIZE_TEXT_2);
-    lv_label_set_text(ver,"Desktop Link 0.3.0-alpha.1");
+    lv_label_set_text(ver,"Coding Companion 0.4.0-alpha.1");
     lv_obj_set_style_text_color(ver,APP_COLOR_WHITE,0);
     lv_obj_align_to(ver,title,LV_ALIGN_OUT_BOTTOM_MID,0,10);
 

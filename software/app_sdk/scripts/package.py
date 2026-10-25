@@ -10,8 +10,8 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--platform", choices=("linux", "t113"), required=True)
-parser.add_argument("--version", default="0.3.0-alpha.1")
-parser.add_argument("--profile", choices=("desktop-link",), default="desktop-link")
+parser.add_argument("--version", default="0.4.0-alpha.1")
+parser.add_argument("--profile", choices=("coding-companion",), default="coding-companion")
 parser.add_argument("--output", type=Path, default=Path("dist"))
 args = parser.parse_args()
 if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", args.version):
@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory() as temporary:
     (stage / "bin").mkdir(parents=True)
     (stage / "notices").mkdir()
     (stage / "companion").mkdir()
-    for filename in ("aurabar_companion.py", "README.md"):
+    for filename in ("aurabar_companion.py", "codex_link.py", "codex_result.schema.json", "README.md"):
         shutil.copyfile(root.parent / "companion" / filename, stage / "companion" / filename)
     for source, notice_name in ((root.parent / "LICENSE", "AuraBar-MIT.txt"),
                          (root / "lvgl/LICENCE.txt", "LVGL-MIT.txt"),

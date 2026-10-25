@@ -1,9 +1,9 @@
-# AuraBar Desktop Link — 0.3.0-alpha.1
+# AuraBar Coding Companion — 0.4.0-alpha.1
 
 Native LVGL 8.3.1 application for the fixed AuraBar T113-S3 board and enclosure.
-Includes the Music & Focus base plus the [Desktop Link task companion](../companion/README.md).
-The Tasks page displays real computer-task state, result details and heartbeat
-status; music remains active across page changes. No AI model is bundled yet.
+Includes Music & Focus, Desktop Link and the [Codex task adapter](../companion/README.md).
+The Tasks page displays real task events and Summary / Evidence / Next review cards.
+Codex runs on the companion computer using its CLI login; no model is bundled.
 
 ## Implemented in this preview
 
@@ -18,7 +18,7 @@ status; music remains active across page changes. No AI model is bundled yet.
   [the engineering review](../../docs/software/review-v0.2.md).
 
 Not included yet: Bluetooth audio, AAC/HLS, DRM music services, album artwork,
-synchronized lyrics, AI and automatic whole-system updates.
+synchronized lyrics, standalone on-device AI and automatic whole-system updates.
 Rain/ocean entries are synthesized textures, not field recordings.
 
 ## Build
@@ -44,8 +44,8 @@ Build type defaults to RelWithDebInfo; AURABAR_BUILD_TYPE=Release selects a rele
 
 ~~~sh
 bash tests/run.sh
-python3 scripts/package.py --platform t113 --version 0.3.0-alpha.1
-python3 scripts/verify_package.py dist/aurabar-desktop-link-0.3.0-alpha.1-t113.tar.gz
+python3 scripts/package.py --platform t113 --version 0.4.0-alpha.1
+python3 scripts/verify_package.py dist/aurabar-coding-companion-0.4.0-alpha.1-t113.tar.gz
 ~~~
 
 Tests use ALSA null; they do not prove speaker quality.
@@ -106,9 +106,9 @@ directory below that root. Pushing a directory into an existing directory of the
 same name can accidentally create image/image or font/font.
 
 ~~~sh
-/usr/bin/aurabar-desktop-link-0.3.0-alpha.1 --music
-/usr/bin/aurabar-desktop-link-0.3.0-alpha.1 --tasks
-/usr/bin/aurabar-desktop-link-0.3.0-alpha.1 --version
+/usr/bin/aurabar-coding-companion-0.4.0-alpha.1 --music
+/usr/bin/aurabar-coding-companion-0.4.0-alpha.1 --tasks
+/usr/bin/aurabar-coding-companion-0.4.0-alpha.1 --version
 ~~~
 
 The current physical panel works with the verified 720x1424 framebuffer and
