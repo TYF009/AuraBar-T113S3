@@ -5,6 +5,7 @@
 typedef enum { TASK_RUNNING, TASK_SUCCEEDED, TASK_FAILED, TASK_CANCELLED } task_state;
 typedef struct {
     char id[64], title[128], stage[128], detail[512];
+    char evidence[512], next_step[512]; /* Optional schema-1 review card fields. */
     task_state state;
     int progress; /* -1 means unavailable, never fabricate percentages. */
     unsigned elapsed_seconds;

@@ -1,0 +1,12 @@
+{
+  "id": "coding-companion",
+  "name": "AuraBar Coding Companion",
+  "version": "0.4.0-alpha.2",
+  "status": "preview",
+  "artifact_kind": "application-upgrade",
+  "bootable_image": false,
+  "hardware": "AuraBar T113-S3 v1.0",
+  "base_features": "Music & Focus and Desktop Link",
+  "features": ["codex-cli-jsonl", "structured-review-card", "observed-command-exits", "summary-evidence-next-tabs", "usb-companion", "completion-notification", "local-result-files"],
+  "not_in_this_preview": ["desktop-app-all-chat-sync", "screen-approval", "screen-task-launch", "screen-task-cancellation", "persistent-task-database", "bundled-model", "automatic-boot-configuration"]
+}

@@ -24,7 +24,7 @@ STATES = {'running', 'succeeded', 'failed', 'cancelled'}
 def bounded(value, limit):
     if not isinstance(value, str) or len(value.encode('utf-8')) > limit:
         raise ValueError('Invalid or oversized text')
-    return ''.join(c if c >= ' ' else ' ' for c in value)
+    return ''.join(c if c >= ' ' and c != '\x7f' else ' ' for c in value)
 
 
 class TaskStore:
@@ -47,6 +47,8 @@ class TaskStore:
         title = bounded(data.get('title', ''), 127)
         stage = bounded(data.get('stage', ''), 127)
         detail = bounded(data.get('detail', ''), 511)
+        evidence = bounded(data.get('evidence', ''), 511)
+        next_step = bounded(data.get('next_step', ''), 511)
         with self.lock:
             old = self.tasks.get(task_id)
             if old and old['state'] != 'running':
@@ -58,7 +60,7 @@ class TaskStore:
                 del self.tasks[terminal]
             clock = time.monotonic()
             self.tasks[task_id] = dict(id=task_id, title=title, state=state, stage=stage,
-                                       detail=detail, progress=progress,
+                                       detail=detail, evidence=evidence, next_step=next_step, progress=progress,
                                        started=old['started'] if old else clock,
                                        finished=clock if state != 'running' else None)
             self.revision += 1
@@ -247,6 +249,8 @@ def main():
     usb = commands.add_parser('bridge')
     usb.add_argument('--adb', default='adb')
     usb.add_argument('--serial', required=True)
+    from codex_link import add_parser, run_codex
+    add_parser(commands)
     args = parser.parse_args()
     try:
         token = token_at(args.token_file, create=args.operation == 'serve')
@@ -260,6 +264,8 @@ def main():
         elif args.operation == 'report':
             api(args.url, token, dict(id=args.id, title=args.title, state=args.state,
                                      stage=args.stage, detail=args.detail, progress=args.progress))
+        elif args.operation == 'codex':
+            return run_codex(args, token, api)
         else:
             bridge(args, token)
     except KeyboardInterrupt:

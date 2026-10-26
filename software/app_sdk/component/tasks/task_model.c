@@ -19,6 +19,10 @@ static int integer(cJSON *obj,const char *key,double max,double *out) {
     if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble)||v->valuedouble<0||v->valuedouble>max||floor(v->valuedouble)!=v->valuedouble)return -1;
     *out=v->valuedouble;return 0;
 }
+static int optional_text(cJSON *obj,const char *key,char *out,size_t size) {
+    if(!cJSON_GetObjectItemCaseSensitive(obj,key)) { out[0]=0;return 0; }
+    return text(obj,key,out,size,0);
+}
 void task_model_age(task_model *m,double now) {
     if(m->view.connected && now-m->view.last_received>5) {
         m->view.connected=0;
@@ -45,6 +49,8 @@ int task_model_accept(task_model *m,const char *json,double now,int heartbeat_re
         if(!cJSON_IsObject(item)||text(item,"id",t->id,sizeof(t->id),1)||
            text(item,"title",t->title,sizeof(t->title),0)||text(item,"stage",t->stage,sizeof(t->stage),0)||
            text(item,"detail",t->detail,sizeof(t->detail),0)||text(item,"state",state,sizeof(state),0))goto done;
+        if(optional_text(item,"evidence",t->evidence,sizeof(t->evidence))||
+           optional_text(item,"next_step",t->next_step,sizeof(t->next_step)))goto done;
         for(int j=0;j<i;++j)if(!strcmp(t->id,next.tasks[j].id))goto done;
         if(!strcmp(state,"running"))t->state=TASK_RUNNING;
         else if(!strcmp(state,"succeeded"))t->state=TASK_SUCCEEDED;

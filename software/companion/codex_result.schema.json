@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "outcome": {"type": "string", "enum": ["completed", "blocked"]},
+    "summary": {"type": "string"},
+    "changes": {"type": "array", "items": {"type": "string"}},
+    "verification_notes": {"type": "array", "items": {"type": "string"}},
+    "next_steps": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["outcome", "summary", "changes", "verification_notes", "next_steps"],
+  "additionalProperties": false
+}

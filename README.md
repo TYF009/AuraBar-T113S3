@@ -12,10 +12,12 @@
 
 ## Highlights / 产品特性
 
-**Desktop Link 0.3 preview:** real computer-task status over the existing USB debug
-connection, completion notifications and music-page integration.
-[Setup](software/companion/README.md) · [Board acceptance screenshots](docs/software/release-0.3.0-alpha.1.md).
-AI model integration remains planned.
+**Coding Companion 0.4 preview:** a desktop companion for AI coding tasks. Follow
+actual Codex CLI events, read Summary / Evidence / Next cards, and review changes
+on your computer. Includes USB task synchronization and the Music & Focus base.
+[Setup](software/companion/README.md) · [Product scope](docs/software/coding-companion.md).
+中文：键盘旁的 AI 编程任务伴侣，显示真实任务状态、命令执行证据和待验收事项。
+Codex runs on the computer with the user's own CLI login; no model runs on the board.
 
 **EN**
 
