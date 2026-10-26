@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "current": "0.4.0-alpha.2",
+  "releases": [
+    {
+      "profile": "music-focus",
+      "version": "0.2.0-alpha.1",
+      "tag": "music-focus-v0.2.0-alpha.1",
+      "source_revision": "2e2883de36a99784a23c852128d5d362f5cfe8b1",
+      "publication": "draft",
+      "artifact_kind": "application-upgrade",
+      "bootable": false,
+      "archive": "aurabar-music-focus-0.2.0-alpha.1-t113.tar.gz",
+      "sha256": "238da485d40fa064d063d03799678f1455a9ebaa0f5e5dfb0bfc825156408a4f",
+      "acceptance": "docs/software/release-0.2.0-alpha.1.md"
+    },
+    {
+      "profile": "desktop-link",
+      "version": "0.3.0-alpha.1",
+      "tag": "desktop-link-v0.3.0-alpha.1",
+      "source_revision": "06eb46430bd07b6704a69d29cdd3ee17d3f59407",
+      "publication": "draft",
+      "artifact_kind": "application-upgrade",
+      "bootable": false,
+      "archive": "aurabar-desktop-link-0.3.0-alpha.1-t113.tar.gz",
+      "sha256": "12be0bbb29203f1ec7a2a31a566fee808b6b52847aa76698e76608f5b2f59bfc",
+      "acceptance": "docs/software/release-0.3.0-alpha.1.md"
+    },
+    {
+      "profile": "coding-companion",
+      "version": "0.4.0-alpha.1",
+      "tag": "coding-companion-v0.4.0-alpha.1",
+      "source_revision": "1486971b75250d5d19f06f119ec38927a1d9626f",
+      "publication": "draft",
+      "artifact_kind": "application-upgrade",
+      "bootable": false,
+      "archive": "aurabar-coding-companion-0.4.0-alpha.1-t113.tar.gz",
+      "sha256": "0c86230fc2f42b2b398ad83f4ed8dd034dd865e27605afe21b51b203acd8d412",
+      "acceptance": "docs/software/release-0.4.0-alpha.1.md"
+    },
+    {
+      "profile": "coding-companion",
+      "version": "0.4.0-alpha.2",
+      "tag": "coding-companion-v0.4.0-alpha.2",
+      "source_revision": "07a8a174c6176d53de3406e28a07d9706fed3fd7",
+      "publication": "draft",
+      "artifact_kind": "application-upgrade",
+      "bootable": false,
+      "archive": "aurabar-coding-companion-0.4.0-alpha.2-t113.tar.gz",
+      "sha256": "2fca94dc3570427cd545a1466b74e340370ee6dfd0135047cfe87a3508aa7b24",
+      "acceptance": "docs/software/release-0.4.0-alpha.2.md"
+    }
+  ]
+}

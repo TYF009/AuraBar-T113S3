@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuraBar task snapshot schema 1",
+  "description": "The runtime also enforces UTF-8 byte bounds; x-maxUtf8Bytes is documentation, not a standard JSON Schema keyword.",
+  "type": "object",
+  "required": ["schema", "server_id", "revision", "sample", "tasks"],
+  "properties": {
+    "schema": {"const": 1},
+    "server_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,63}$"},
+    "revision": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "sample": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "tasks": {
+      "type": "array", "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "state", "stage", "detail", "progress", "elapsed_seconds"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,63}$"},
+          "title": {"type": "string", "x-maxUtf8Bytes": 127},
+          "stage": {"type": "string", "x-maxUtf8Bytes": 127},
+          "detail": {"type": "string", "x-maxUtf8Bytes": 511},
+          "evidence": {"type": "string", "x-maxUtf8Bytes": 511},
+          "next_step": {"type": "string", "x-maxUtf8Bytes": 511},
+          "state": {"enum": ["running", "succeeded", "failed", "cancelled"]},
+          "progress": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+          "elapsed_seconds": {"type": "integer", "minimum": 0, "maximum": 4294967295}
+        }
+      }
+    }
+  }
+}

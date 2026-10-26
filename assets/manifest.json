@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "assets": [
+    {
+      "path": "assets/renders/ai-workspace.webp",
+      "kind": "concept",
+      "source": "imagegen",
+      "source_master": "01-ai-desk-hero-v1.png",
+      "source_sha256": "30939a9814e71d833e5bd37d78091b2e6b0b075f194c634bf399a0a0510a81f3",
+      "description": "AI workspace concept",
+      "date": "2026-10-26",
+      "sha256": "5a3b1a4f6d44454b29d8c50986e7a05ab81e95274935004113e847bb221dc711"
+    },
+    {
+      "path": "assets/renders/connected-kitchen.webp",
+      "kind": "concept",
+      "source": "imagegen",
+      "source_master": "02-smart-kitchen-hero-v1.png",
+      "source_sha256": "652e55e8a20448d00fb19defd31dea3161bef61c4be72338ccf39474779b98a7",
+      "description": "Connected appliance concept",
+      "date": "2026-10-26",
+      "sha256": "fb204ee0211f6a1aa3c3cbf07b5a177474ce87e74c21edd7018d035dca850b01"
+    },
+    {
+      "path": "assets/renders/vehicle-display.webp",
+      "kind": "concept",
+      "source": "imagegen",
+      "source_master": "03-vehicle-hero-v1.png",
+      "source_sha256": "2ca4f32dac8c24abeb682a0edf6ad80aeb33ca4e767cf1ec2cbb27e01059f6f3",
+      "description": "Parked vehicle auxiliary-display concept",
+      "date": "2026-10-26",
+      "sha256": "46160c61f655fc95a375dc5acadffa052afebe12e281922b3bd2cd4bc81689ed"
+    },
+    {
+      "path": "assets/screenshots/coding-companion.png",
+      "kind": "framebuffer",
+      "source": "coding-summary-board.png",
+      "description": "Actual T113 UI capture; see acceptance record",
+      "sha256": "06cded9180bf6e71dca0c49babe492ae43425f8bc561373f1353cc5edd99bf80"
+    },
+    {
+      "path": "assets/screenshots/music-focus.png",
+      "kind": "framebuffer",
+      "source": "music-focus-board.png",
+      "description": "Actual music UI capture",
+      "sha256": "f499d07506435ac6c8d3696050cfdd26d8c329fbcc829a352782c7130a9114b7"
+    },
+    {
+      "path": "assets/engineering/pcb-reference.png",
+      "kind": "cad-render",
+      "source": "pcb-preview.png",
+      "description": "Supplied STEP geometry, illustrative materials",
+      "sha256": "05dd75788a96a283ad4aff2f6588bb2c55f8dd11b7c5962bab4d73845abbc9db"
+    }
+  ]
+}

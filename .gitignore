@@ -40,5 +40,17 @@ software/**/.cache/
 # ---- 日志 ----
 *.log
 
+# Local development, pairing and private task data
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.task-link/
+.build-control/
+.aurabar/
+codex-runs/
+
 # ---- 保留空目录占位 ----
 !**/.gitkeep

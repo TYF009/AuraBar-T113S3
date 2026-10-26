@@ -1,0 +1,20 @@
+name: Bug report
+description: Report reproducible software or device behavior
+title: "[Bug] "
+body:
+  - type: textarea
+    attributes:
+      label: Version and environment
+      description: Application version/commit, board revision, baseline image, host OS and transport.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction and observed behavior
+      description: Steps, expected result and actual result.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant redacted logs or captures
+      description: Remove tokens, credentials and private task content. Use security reporting for sensitive issues.

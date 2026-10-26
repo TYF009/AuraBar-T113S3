@@ -1,0 +1,12 @@
+name: Feature or integration request
+description: Describe a user need and the available hardware/data source
+body:
+  - type: textarea
+    attributes:
+      label: User problem and desired workflow
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Existing hardware and integration interface
+      description: Explain what is available and what still needs development; distinguish concepts from working integrations.
