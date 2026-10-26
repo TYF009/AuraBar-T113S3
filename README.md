@@ -22,7 +22,7 @@
 - **Dual USB-C 16-pin**: one for power (USB Host reserved), one for ADB / firmware (USB OTG), with CC 5.1 kΩ Rd, ESD protection and power OR-ing
 - Four independent SY8088 buck rails (3.3 V / 1.8 V / 1.5 V / 0.9 V), MT9201 PWM backlight driver
 - LQFP128 SoC and 0603/SOT-23 passives throughout — **hand-solderable, tutorial-friendly, JLCPCB/LCSC one-click BOM**
-- Planned software: clock, weather, Pomodoro, volume & screen-off control, mini-games, HID shortcuts, BLE-Mesh central control
+- **Music & Focus preview**: local WAV/MP3, direct MP3 streams, synthesized ambient sound, clock, weather, Pomodoro and To-Do. [Software and validation status](software/).
 
 **中文**
 
@@ -34,7 +34,7 @@
 - **双 USB-C 16Pin**：一个主供电（USB Host 预留），一个 ADB/烧录（USB OTG），含 CC 5.1kΩ 下拉、ESD 保护与双电源防倒灌
 - 四路独立 SY8088 降压（3.3/1.8/1.5/0.9V），MT9201 PWM 背光驱动
 - LQFP128 主控、0603/SOT-23 器件，**可手工焊接、适合教学复刻，立创 BOM 一键下单**
-- 软件规划：时钟、天气、番茄钟、音量与熄屏控制、小游戏、HID 快捷键、BLE Mesh 中控
+- **Music & Focus 预览版**：本地 WAV/MP3、MP3 网络流、合成环境音、时钟、天气、番茄钟与待办。[软件与实测状态](software/)。
 
 ## System Block Diagram / 系统框图
 
@@ -95,7 +95,7 @@ AuraBar-T113S3/
 │       └── images/               # 33 design figures / 设计过程图
 ├── docs/requirements/            # Product requirements / 需求分析
 ├── tools/                        # Burning-tool download notes / 烧录工具说明
-└── software/                     # Software (coming soon) / 软件部分（待补充）
+└── software/                     # Music & Focus application / 应用源码、测试与版本配置
 ```
 
 ## Documentation / 文档
@@ -149,13 +149,13 @@ AuraBar-T113S3/
 
 ## Software Roadmap / 软件路线图
 
-**EN** The software part will be added under [`software/`](software/): Linux (Tina/Buildroot) BSP bring-up → display & touch drivers → desktop-assistant app (clock / weather / Pomodoro) → audio & volume → screen-off control → mini-games / HID shortcuts → BLE-Mesh central control.
+**EN** [Music & Focus 0.2.0-alpha.1](software/) includes the LVGL application, regression tests, edition manifest and checksummed application packaging. The ARM application and generated WAV/MP3 output were tested on the existing board. Full bootable firmware awaits a reproducible BSP build; AI and desktop integration editions remain planned.
 
-**中文** 软件部分后续补充到 [`software/`](software/)：Linux（Tina/Buildroot）BSP 适配 → 显示与触摸驱动 → 桌面助理应用（时钟/天气/番茄钟）→ 音频与音量 → 熄屏控制 → 小游戏 / HID 快捷键 → BLE Mesh 中控。
+**中文** [Music & Focus 0.2.0-alpha.1](software/) 已加入 LVGL 应用、回归测试、版本配置及带校验的应用打包工具。ARM 程序及生成的 WAV/MP3 测试音已在现有板卡验证。完整可烧录固件仍需可复现的 BSP 构建，AI 与桌面联动版本属于后续计划。
 
 ## License / 许可
 
-**EN** Hardware design files are released under **CERN-OHL-S-2.0** (open hardware); documentation under **CC BY-SA 4.0**; software (to be added) under **MIT**. Component trademarks belong to their respective owners.
+**EN** Hardware design files are released under **CERN-OHL-S-2.0** (open hardware); documentation under **CC BY-SA 4.0**; application software under **MIT**. Component trademarks belong to their respective owners.
 
 **中文** 硬件设计文件以 **CERN-OHL-S-2.0**（开源硬件）许可发布；文档采用 **CC BY-SA 4.0**；软件（待补充）采用 **MIT**。元器件商标归各自所有者。
 

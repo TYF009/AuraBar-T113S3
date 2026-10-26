@@ -1,0 +1,6 @@
+add_library(music STATIC music_player.c pcm_output.c)
+target_include_directories(music PUBLIC . PRIVATE ../hal ../../third_party/minimp3)
+target_link_libraries(music PUBLIC pthread dl m curl lvgl_porting storage)
+if(SIMULATOR_LINUX)
+    target_compile_definitions(music PRIVATE PROJECT_MUSIC_URL="${CMAKE_BINARY_DIR}/app/res/music/library")
+endif()

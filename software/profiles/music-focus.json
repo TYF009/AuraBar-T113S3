@@ -1,0 +1,15 @@
+{
+  "id": "music-focus",
+  "name": "AuraBar Music & Focus",
+  "version": "0.2.0-alpha.1",
+  "status": "preview",
+  "artifact_kind": "application-upgrade",
+  "bootable_image": false,
+  "hardware": "AuraBar T113-S3 v1.0",
+  "tested_kernel": "Tina Linux 5.4.61",
+  "display": {"driver": "fl7707n_mipi", "framebuffer": [720, 1424], "visible_ui": [1424, 280]},
+  "features": ["local-pcm16-wav", "local-mp3", "direct-mp3-http-stream", "queue", "pause", "local-seek", "favorites", "repeat-queue", "sleep-timer", "procedural-ambient-audio"],
+  "not_in_this_preview": ["bluetooth-audio", "hls-aac", "streaming-platform-drm", "ai", "synchronized-lyrics", "album-art", "automatic-system-image-update"],
+  "data_directory": "/usr/var/lib/aurabar",
+  "music_directory": "/usr/res/music/library"
+}
