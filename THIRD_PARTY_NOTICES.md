@@ -12,7 +12,13 @@ Repository component licenses are scoped in [LICENSE](LICENSE). They do not repl
 | Concept visuals | Generated with imagegen for this project, clearly classified in the [asset registry](assets/README.md) |
 | External enclosure | [Source reference](hardware/mechanical/README.md); original STL terms are not replaced by the electronics license |
 
-Font files include `Aqum-2-Classic-2.otf`, `Library-3-am-3.otf` and Source Han Sans CN light/regular files. Their embedded names are not a complete license record. Before public binary publication, collect the applicable font notices and verify bundled image/audio provenance. Prepared binaries remain drafts while this release item is open.
+The [resource provenance record](software/resource-provenance.json) captures exact font hashes and embedded notices:
+
+- `Aqum-2-Classic-2.otf` has a copyright notice but no embedded license text or license URL. Its original distribution license remains unrecorded.
+- `Library-3-am-3.otf` embeds a free-use agreement from Igor Kosinsky, including a restriction on selling the fonts. The embedded text is recorded verbatim.
+- These particular Source Han Sans CN light/regular files embed 2014 Adobe Apache-2.0 notices; do not infer their terms from a different modern font release.
+
+Embedded metadata is evidence, not a complete redistribution review. Before public binary publication, collect applicable distribution notices and verify bundled image/audio provenance. Prepared binaries remain drafts while this release item is open.
 
 The existing hardware guide and figures retain the scope of [hardware/LICENSE](hardware/LICENSE); newly authored repository documentation follows the root documentation scope. No existing third-party component has been relicensed by this reorganization.
 

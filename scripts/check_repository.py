@@ -80,10 +80,17 @@ def check():
             errors.append(f'Asset digest mismatch: {asset["path"]}')
         if asset.get('kind') not in ('concept', 'framebuffer', 'cad-render'):
             errors.append(f'Unclassified asset: {asset["path"]}')
+    fonts = json.loads((ROOT / 'software/resource-provenance.json').read_text(encoding='utf-8'))['fonts']
+    for font in fonts:
+        target = (ROOT / font['path']).resolve()
+        if not target.is_relative_to(ROOT) or not target.is_file():
+            errors.append('Invalid font provenance path')
+        elif hashlib.sha256(target.read_bytes()).hexdigest() != font['sha256']:
+            errors.append(f'Font provenance digest mismatch: {font["path"]}')
     if errors:
         print('\n'.join(errors), file=sys.stderr)
         return 1
-    print(f'Checked {len(docs)} documents, {links} local links, {len(assets)} assets and {len(tags)} release records; version {version}.')
+    print(f'Checked {len(docs)} documents, {links} local links, {len(assets)} assets, {len(fonts)} font records and {len(tags)} releases; version {version}.')
     return 0
 
 
