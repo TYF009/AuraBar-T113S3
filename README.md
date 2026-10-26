@@ -12,6 +12,11 @@
 
 ## Highlights / 产品特性
 
+**Desktop Link 0.3 preview:** real computer-task status over the existing USB debug
+connection, completion notifications and music-page integration.
+[Setup](software/companion/README.md) · [Board acceptance screenshots](docs/software/release-0.3.0-alpha.1.md).
+AI model integration remains planned.
+
 **EN**
 
 - **6.9" ultra-wide bar panel**, 280 × 1424, **MIPI DSI** 4-lane, with capacitive touch (**GT911, I2C**)

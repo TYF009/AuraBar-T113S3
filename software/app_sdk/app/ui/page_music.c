@@ -1,6 +1,7 @@
 /* AuraBar Music & Focus: UI timers and objects have one page owner. */
 #include "page_conf.h"
 #include "music_player.h"
+#include "task_status.h"
 #include "device_data.h"
 #include "font_conf.h"
 #include "color_conf.h"
@@ -10,6 +11,7 @@
 static lv_timer_t *timer;
 static lv_obj_t *root, *title, *state, *time_text, *seek_bar, *play_text, *repeat_text, *sleep_text, *favorite_text;
 static int seeking;
+static lv_obj_t *task_text;
 static const char *state_name(music_state s) {
     switch(s) {
         case MUSIC_BUFFERING:return "Loading";
@@ -51,6 +53,9 @@ static void back(lv_event_t *e) {
     lv_obj_clean(lv_scr_act());
     init_page_main();
 }
+static void tasks(lv_event_t *e) {
+    (void)e;lv_obj_clean(lv_scr_act());init_page_tasks();
+}
 static void select_track(lv_event_t *e) { music_play((int)(intptr_t)lv_event_get_user_data(e)); }
 static void transport(lv_event_t *e) {
     intptr_t action=(intptr_t)lv_event_get_user_data(e);
@@ -90,6 +95,11 @@ static void update(lv_timer_t *t) {
     (void)t;
     if(!root)return;
     music_snapshot s; music_get_snapshot(&s);
+    task_snapshot jobs;task_status_snapshot(&jobs);
+    char task_line[180];
+    if(jobs.count)snprintf(task_line,sizeof(task_line),"%s: %s%s",jobs.tasks[0].state==TASK_RUNNING?"Running":jobs.tasks[0].state==TASK_SUCCEEDED?"Completed":jobs.tasks[0].state==TASK_FAILED?"Failed":"Cancelled",jobs.tasks[0].title,jobs.connected?"":" (offline)");
+    else snprintf(task_line,sizeof(task_line),"Your music, a quieter workspace.");
+    lv_label_set_text(task_text,task_line);
     lv_label_set_text(title,s.title);
     lv_label_set_text(state,s.state==MUSIC_ERROR?s.error:state_name(s.state));
     lv_label_set_text(play_text,s.state==MUSIC_PLAYING||s.state==MUSIC_BUFFERING?"Pause":"Play");
@@ -124,7 +134,8 @@ void init_page_music(void) {
     lv_obj_add_event_cb(root,page_deleted,LV_EVENT_DELETE,NULL);
     button(root,"Back",16,12,80,back,NULL);
     label(root,"Music & Focus",116,16,420,28);
-    label(root,"Your music, a quieter workspace.",720,20,670,20);
+    task_text=label(root,"",720,20,520,18);
+    button(root,"Tasks",1260,12,130,tasks,NULL);
 
     lv_obj_t *list=lv_list_create(root);
     lv_obj_set_pos(list,16,66); lv_obj_set_size(list,310,194);

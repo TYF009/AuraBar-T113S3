@@ -44,6 +44,7 @@ typedef enum{
     MENU_TOMATO_TIME,
     MENU_TODO,
     MENU_MUSIC,
+    MENU_TASKS,
     MENU_CLOCK,
     MENU_TIME,
     MENU_CITY,
@@ -63,6 +64,7 @@ typedef struct{
 
 static menu_info_t menu_info_list[] = {
     {MENU_MUSIC,"Music",GET_IMAGE_PATH("icon_music.png")},
+    {MENU_TASKS,"Tasks",GET_IMAGE_PATH("icon_menu_todo.png")},
     {MENU_TOMATO_TIME,"Pomodoro",GET_IMAGE_PATH("icon_menu_tomato_time.png")},
     {MENU_TODO,"To-Do",GET_IMAGE_PATH("icon_menu_todo.png")},
     {MENU_CLOCK,"Alarm",GET_IMAGE_PATH("icon_menu_time.png")},
@@ -161,6 +163,14 @@ static void deinit_timer(){
     refresh_timer = NULL;
 }
 
+static void page_deleted(lv_event_t *event){
+    (void)event;
+    deinit_timer();
+    deinit_clock0_obj(&lv_clock0);
+    deinit_clock1_obj(&lv_clock1);
+    deinit_clock2_obj(&lv_clock2);
+}
+
 static void time_sync_click_event_cb(lv_event_t * e){
     printf("time_sync_click_event_cb\n");
     device_state_t* device_state = get_device_state();
@@ -192,6 +202,9 @@ static void menu_click_event_cb(lv_event_t * e){
     }else if(strcmp(menu_name,"Music") == 0){
         delete_current_page(&com_style);
         init_page_music();
+    }else if(strcmp(menu_name,"Tasks") == 0){
+        delete_current_page(&com_style);
+        init_page_tasks();
     }else if(strcmp(menu_name,"To-Do") == 0){
         delete_current_page(&com_style);
         init_page_todo();
@@ -400,6 +413,7 @@ void init_page_main(void)
     com_style_init();
     lv_obj_t * cont = lv_obj_create(lv_scr_act());
     lv_obj_set_size(cont, LV_PCT(100), LV_PCT(100));
+    lv_obj_add_event_cb(cont,page_deleted,LV_EVENT_DELETE,NULL);
     lv_obj_center(cont);
     lv_obj_add_style(cont, &com_style, 0);
     lv_obj_clear_flag(cont,LV_OBJ_FLAG_SCROLLABLE);

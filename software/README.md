@@ -7,9 +7,12 @@ touch, storage and audio base; each edition has its own version and release asse
 |---|---|---|
 | Music & Focus | 0.2.0-alpha.1 preview | Music, procedural ambient sound, focus tools |
 | AI Assistant | Planned | Voice/text interaction and approved device actions |
-| Connected Desktop | Planned | PC companion and live information cards |
+| Desktop Link | 0.3.0-alpha.1 preview | Real computer-task status, USB companion and completion notifications; includes the music base |
 
-Start with [Music & Focus](app_sdk/README.md).
+See the [current application source and build guide](app_sdk/README.md).
+For the current source version, see [Desktop Link setup](companion/README.md).
+[Desktop Link acceptance record / 实机验收记录](../docs/software/release-0.3.0-alpha.1.md)
+The 0.2.0 preview remains on its original branch/release; this source builds 0.3.0.
 ![Music page captured from the T113 framebuffer](../docs/software/images/music-focus-board.png)
 
 [Preview acceptance record / 预览版验收记录](../docs/software/release-0.2.0-alpha.1.md)

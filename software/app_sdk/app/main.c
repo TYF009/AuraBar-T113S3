@@ -10,6 +10,7 @@
 #include "http_manager.h"
 #include "audio_player_async.h"
 #include "music_player.h"
+#include "task_status.h"
 
 extern void lv_port_disp_init(bool is_disp_orientation);
 extern void lv_port_indev_init(void);
@@ -17,11 +18,11 @@ static uint32_t time_till_next = 1;
 
 int main(int argc, char **argv) {
     if (argc > 1 && strcmp(argv[1], "--version") == 0) {
-        puts("AuraBar Music & Focus 0.2.0-alpha.1");
+        puts("AuraBar Desktop Link 0.3.0-alpha.1");
         return 0;
     }
-    if (argc > 1 && strcmp(argv[1], "--music") != 0) {
-        fprintf(stderr, "Usage: %s [--music|--version]\n", argv[0]);
+    if (argc > 2 || (argc > 1 && strcmp(argv[1], "--music") != 0 && strcmp(argv[1], "--tasks") != 0)) {
+        fprintf(stderr, "Usage: %s [--music|--tasks|--version]\n", argv[0]);
         return 2;
     }
     system_signal_init();
@@ -42,11 +43,14 @@ int main(int argc, char **argv) {
     wpa_manager_open();
 #endif
     http_request_create();
-    if (argc > 1) init_page_music();
+    if(task_status_init())fprintf(stderr,"Task link configuration is unavailable\n");
+    if (argc > 1 && !strcmp(argv[1],"--tasks")) init_page_tasks();
+    else if (argc > 1) init_page_music();
     else init_page_main();
     while (!system_should_exit()) {
         http_dispatch_pending();
         wpa_manager_dispatch_pending();
+        if(task_status_take_notice())start_play_audio_async(GET_MUSIC_PATH("audio_msg.wav"));
         time_till_next = lv_task_handler();
         if (time_till_next > 20) time_till_next = 20;
         /**
@@ -54,6 +58,7 @@ int main(int argc, char **argv) {
          */
         usleep(time_till_next*1000);
     }
+    task_status_shutdown();
     music_stop();
     deinit_async_audio_player();
     music_shutdown();
