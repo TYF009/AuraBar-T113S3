@@ -14,7 +14,7 @@ def check():
     docs = set(ROOT.glob('*.md')) | set((ROOT / 'docs').rglob('*.md'))
     for folder in ('hardware', 'assets', 'software', 'software/app_sdk', 'software/companion', 'hardware/mechanical'):
         docs.update((ROOT / folder).glob('*.md'))
-    docs.add(ROOT / 'hardware/docs/hardware-design-guide.md')
+    docs.update((ROOT / 'hardware/docs').glob('*.md'))
     for path in (ROOT / 'docs/architecture').glob('*.json'):
         try:
             json.loads(path.read_text(encoding='utf-8'))

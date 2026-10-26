@@ -1,538 +1,583 @@
-# AuraBar Hardware Design Guide / 硬件设计指南
+# AuraBar Hardware Design Handbook / 硬件电路设计手册
 
-**English first; Chinese translation follows each section. / 英文为主，每节附中文对照。**
+**English first, followed by Chinese in each subsection. / 每个小节先英文，后中文对照。**
 
-Project: AuraBar (internal project name `6.22_Screen`)
-SoC: Allwinner T113-S3 (dual Cortex-A7, HiFi4 DSP, 128 MB DDR3 in-package)
-EDA: LCEDA Pro (嘉立创EDA专业版), project `6.22_Screen.eprj2`, Board1 / Schematic1, v1.0
-Schematic pages: T113S3 · NET · POWER · CONNECT · AUDIO · FLASH · DISPLAY
+This handbook explains the AuraBar board from requirements through component selection, circuit behavior and bring-up. It preserves every unique image embedded in the original Word notes and adds the seven final schematic sheets so that historical reasoning can be compared with the released electronics sources. Start with the [product architecture guide](../../docs/hardware/README.md) for the product-level view.
 
-> **Revision notes / 版本迭代说明**
-> The final BOM/PDF supersedes a few early reference screenshots: the amplifier is **LM4871** (not LM4890S), the backlight boost is **MT9201** (not SY7200AABC), and all four power rails use **SY8088AAC** (the early 1.8 V rail used an XC6206 LDO). This guide describes the final design.
->
-> 本指南按最终 BOM 与原理图校对：功放最终为 **LM4871**（早期截图为 LM4890S），背光升压为 **MT9201**（早期框图为 SY7200AABC），四路电源全部采用 **SY8088AAC**（早期 1.8V 用 XC6206 LDO）。核对器件与连线时以最终 BOM 和原理图为准。产品设计思路见[硬件设计指南](../../docs/hardware/README.md)。
+本文从需求、器件选型、电路行为到调试说明 AuraBar 主板。原始 Word 中全部独立图片均予保留，同时加入最终原理图七个图页，便于比较设计推导与当前电子设计资料。产品层面的说明见[硬件架构指南](../../docs/hardware/README.md)。
 
----
+| Design record / 设计记录 | Baseline / 基线 |
+|---|---|
+| Project / 项目 | AuraBar, internal name `6.22_Screen` |
+| Controller / 主控 | Allwinner T113-S3; dual Cortex-A7, HiFi4 DSP, 128 MB DDR3 in-package |
+| Electronics / 电子设计 | LCEDA Pro; Board1 / Schematic1; schematic V1.0 |
+| Sheets / 图页 | T113S3 · NET · POWER · CONNECT · AUDIO · FLASH · DISPLAY |
+| Input / 输入 | Regulated 5 V USB / 稳压 5 V USB |
+| Source images / 原始图片 | 26 unique Word images, 27 placements; one reused image / 26 张独立图，27 处引用，其中一张重复 |
+| Evidence / 依据 | [PDF](../schematic/AuraBar-Schematic-v1.0.pdf), [BOM](../bom/AuraBar-BOM-v1.0.csv), [netlist](../schematic/netlist.net), [original Word](hardware-design-guide-source.docx) |
+
+**Reading the figures.** “Original note” means a preserved historical illustration; its designators or alternatives can differ from the final export. “Final sheet” means a raster preview of the repository PDF, with the vector PDF linked for full-detail inspection. Text and callouts inside original images retain their source language. See the [figure index and SHA-256 mapping](figure-index.md) for complete coverage.
+
+**图示阅读方式。**“原始说明图”表示保留的历史图示，位号与备选器件可能与最终导出不同；“最终图页”表示仓库 PDF 的栅格预览，查看细节可打开矢量 PDF。原图内的文字保留原始语言。全部图片覆盖情况及 SHA-256 对应关系见[图像索引](figure-index.md)。
+
+## Contents / 目录
+
+- [1. SoC selection / 主控选型](#1-soc-selection--主控选型)
+- [2. Minimum system / 最小系统](#2-minimum-system--最小系统)
+- [3. DDR configuration / DDR 配置](#3-ddr-configuration--ddr-配置)
+- [4. Power generation and decoupling / 电源与去耦](#4-power-generation-and-decoupling--电源与去耦)
+- [5. Final controller sheet / 最终主控图页](#5-final-controller-sheet--最终主控图页)
+- [6. Storage and recovery / 存储与恢复](#6-storage-and-recovery--存储与恢复)
+- [7. USB and supply direction / USB 与供电方向](#7-usb-and-supply-direction--usb-与供电方向)
+- [8. Keys and serial diagnostics / 按键与串口诊断](#8-keys-and-serial-diagnostics--按键与串口诊断)
+- [9. Audio input and output / 音频输入与输出](#9-audio-input-and-output--音频输入与输出)
+- [10. Wireless connectivity / 无线连接](#10-wireless-connectivity--无线连接)
+- [11. Display touch and backlight / 显示触摸与背光](#11-display-touch-and-backlight--显示触摸与背光)
+- [12. PCB and bring-up review / PCB 与调试审查](#12-pcb-and-bring-up-review--pcb-与调试审查)
+- [13. Source corrections / 来源差异与修正](#13-source-corrections--来源差异与修正)
+- [14. Components and source documents / 器件与设计资料](#14-components-and-source-documents--器件与设计资料)
 
 ## 1. SoC Selection / 主控选型
 
-**EN**
+The T113-S3 combines application processing, an integrated audio codec and display interfaces with 128 MB DDR3 in one package. This allows the board to run Linux and a native touch interface without routing a separate DDR memory package. The leaded 128-pin package also makes inspection and prototype rework practical. The BOM footprint is named `TQFP-128`; the original narrative describes the package as LQFP128. Use the actual mechanical land pattern and exposed-pad requirements when manufacturing.
 
-The T113-S3 was chosen for two reasons:
+T113-S3 将应用处理器、音频 codec、显示接口与 128 MB DDR3 集成在同一封装内，使板卡可以运行 Linux 和原生触摸界面，同时减少独立 DDR 封装的互连布线。128 引脚引线封装也便于检查和原型返修。BOM 封装名称为 `TQFP-128`，原始文字称 LQFP128；制造时应核对实际焊盘尺寸与裸露焊盘要求。
 
-1. **Accessible assembly and rework** — the LQFP128 package supports practical soldering, inspection and rework during prototype development, reducing the effort needed to validate the board.
-2. **Strong configuration** — dual Cortex-A7 cores, one HiFi4 DSP, 128 MB DDR3 integrated in-package, 3 ADCs, 2 DACs, 2 I2S/PCM interfaces, MIPI DSI display output, and an integrated audio codec.
+![SoC feature reference / 主控功能参考](images/t113-s3-features.png)
 
-Datasheet: https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf
+*Original Word image 1: silicon capabilities. / Word 原图 1：芯片资源。*
 
-![T113-S3 feature list](images/t113-s3-features.png)
+The feature list describes silicon resources, not automatically delivered product functions. The current application uses display, touch, audio and USB task communication. DSP acceleration, video pipelines and microphone-based AI assistants require their own software and acceptance work.
 
-![T113-S3 official block diagram](images/t113-s3-block-diagram.png)
+参数图表示芯片资源，不等于产品已交付功能。当前应用使用显示、触摸、音频与 USB 任务通信；DSP 加速、视频链路与麦克风 AI 助手仍需各自的软件实现与验收。
 
-**中文**
+![SoC block diagram / 主控框图](images/t113-s3-block-diagram.png)
 
-选择 T113-S3 主要有两方面考虑：
+*Original Word image 2: controller architecture reference. / Word 原图 2：主控架构参考。*
 
-1. **便于装配与返修** —— LQFP128 封装便于原型阶段焊接、检查和返修，降低板卡验证的实施门槛；
-2. **配置不错** —— Cortex-A7 双核、单核 HiFi4 DSP、内置 128MB DDR3、3 个 ADC、2 个 DAC、2 路 I2S/PCM、MIPI DSI 显示输出、集成音频 codec。
+![Controller symbol / 主控元件符号](images/mcu-symbol-drawing.png)
 
-数据手册：https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf
+*Original Word image 3: multi-part symbol used to organize power and interface pins. / Word 原图 3：通过多部分符号组织电源与接口引脚。*
 
-The custom multi-part symbol for the SoC is built from the datasheet pinout:
-按数据手册引脚绘制的主控元件符号如下：
+![Early system architecture / 早期系统框图](images/system-architecture.jpg)
 
-![SoC symbol](images/mcu-symbol-drawing.png)
+*Additional historical reference. It shows earlier SY7200AABC and LM4890S choices; the current BOM uses MT9201 and LM4871. / 补充历史参考图：其中 SY7200AABC 与 LM4890S 为早期选择，当前 BOM 为 MT9201 与 LM4871。*
 
----
+For product design, the useful combination is a compact local interface and a more capable computer-side AI service. Keep large models and project context on the host; use the board for state, result cards, touch and sound. The 128 MB RAM budget makes bounded buffers, limited image caches and controlled service counts important.
+
+产品设计上，可将紧凑的板端界面与电脑端 AI 服务组合：模型和项目上下文留在主机，板卡负责状态、结果卡片、触摸与声音。128 MB 内存条件要求缓冲区、图片缓存和常驻服务数量保持可控。
 
 ## 2. Minimum System / 最小系统
 
-**EN** The minimum system consists of four parts: clock circuit, reset circuit, power circuit, and flash circuit.
+The minimum system comprises the clock sources, reset, supply rails, DDR configuration and boot storage. Diagnose these before adding display or application complexity. A valid boot log is stronger evidence of startup progress than a power indicator alone.
 
-**中文** 最小系统包括四部分：时钟电路、复位电路、电源电路、Flash 电路。
+最小系统由时钟、复位、电源轨、DDR 配置与启动存储构成。应先确认这些基础，再排查显示或应用功能。电源灯只能说明局部供电存在，启动日志更能反映系统启动进展。
 
-### 2.1 Clock Circuit / 时钟电路
+### 2.1 Main clock / 主时钟
 
-The T113 requires two crystals: a main crystal and a low-speed (RTC) crystal. The SoC can also generate and fan out a clock for other peripherals (unused here).
-T113 有两个晶振要求：主晶振和低速晶振；芯片也可产生时钟给其它外设（扇出功能本设计未使用）。
+The design uses a 24 MHz crystal X1, YXC XL2EL89COI-111YLC-24M, with a ±10 ppm selection target. In the final netlist, DXOUT is T1 pin 22 and DXIN is pin 23; the load capacitors are **C122/C123, 12 pF**. The historical screenshot uses different capacitor designators.
 
-#### 2.1.1 Main clock, 24 MHz / 主时钟
+设计使用 24 MHz 晶体 X1，型号为扬兴 XL2EL89COI-111YLC-24M，选型目标为 ±10 ppm。最终网表中 DXOUT 为 T1 的 22 脚、DXIN 为 23 脚，负载电容为 **C122/C123，12 pF**；历史截图的电容位号不同。
 
-**EN**
+![Original main clock circuit / 原始主时钟电路](images/clock-main-24m.png)
 
-Per the hardware design guide, the T113 module supports only a **24 MHz** main crystal, connected across **DXIN / DXOUT (pins 22–23)**. The smaller the frequency tolerance the better, since the output stays closer to its nominal value; a **±10 ppm** crystal is selected. The load capacitors match the crystal (12 pF), with some margin for IC and trace parasitics; they can be tuned after bring-up.
+*Original Word image 4; also reused in the Word RTC discussion. C30/C31 in this historical figure are not the final clock-capacitor designators. / Word 原图 4，在 RTC 说明处重复使用过一次；图中 C30/C31 不是最终主时钟电容位号。*
 
-- Crystal: YXC XL2EL89COI-111YLC-24M (LCSC **C5444545**), 24 MHz, CL = 12 pF, ±10 ppm, −40~85 °C
-- Load capacitors: 12 pF 0603 1% (LCSC **C519482**), C30 / C123
+Crystal load is approximately `CL = C1*C2/(C1+C2) + Cstray`; two 12 pF capacitors do not imply a 12 pF effective load. Include oscillator-pin and PCB parasitics, then verify startup margin and frequency with suitable low-loading measurement methods. Keep the crystal loop short and away from switching nodes. REFCLK-OUT is unused in this design.
 
-The main clock also supports fan-out through REFCLK-OUT for external modules (unused). When fan-out is used the tolerance should be ≤ ±10 ppm; without fan-out ≤ ±20 ppm is acceptable.
+晶体等效负载近似为 `CL = C1*C2/(C1+C2) + Cstray`，因此两颗 12 pF 电容不等于 12 pF 有效负载。需计入振荡器引脚与 PCB 寄生，再使用低负载测量方法验证起振裕量与频率。晶体回路应短，并远离开关节点。本设计未使用 REFCLK-OUT 扇出。
 
-**中文**
+### 2.2 RTC clock / RTC 时钟
 
-参考硬件设计指南，T113 模块只支持 **24MHz** 主时钟，接至 **DXIN、DXOUT（22、23 号引脚）**。晶振频偏越小越好——频偏越小，输出频率越接近额定频率，因此选 ±10ppm。匹配电容按晶振选型取 12pF，并需考虑 IC 内部与走线寄生电容，后续可按实际时钟效果调整。
+X2 is a 32.768 kHz crystal, YXC X321532768KGD2SI, connected to X32KOUT/X32KIN on pins 24/25. C120/C121 are 12 pF and R14 is 10 MΩ across the oscillator nodes. The high-value resistor provides a feedback/bias path; it should not be described as an adjustable frequency-trimming element. Frequency depends on the crystal and effective loading.
 
-- 晶振：扬兴 XL2EL89COI-111YLC-24M（立创 **C5444545**），24MHz、负载 12pF、±10ppm、−40~85℃
-- 匹配电容：12pF 0603 1%（立创 **C519482**），C30 / C123
+X2 为扬兴 X321532768KGD2SI、32.768 kHz 晶体，连接 X32KOUT/X32KIN 的 24/25 脚；C120/C121 为 12 pF，R14 为跨接振荡节点的 10 MΩ 电阻。高阻电阻提供反馈或偏置通路，不宜解释成可调的频率微调元件；频率取决于晶体与实际负载。
 
-主时钟还可通过 REFCLK-OUT 扇出给外部模块（本设计未用）：需要扇出时晶振频偏应 ≤±10ppm，不需要扇出时 ≤±20ppm 即可。
+![RTC circuit / RTC 电路](images/clock-rtc-32k-schematic.png)
 
-![Main 24 MHz clock](images/clock-main-24m.png)
+*Original Word image 5: crystal, loading and feedback path. / Word 原图 5：晶体、负载与反馈通路。*
 
-#### 2.1.2 Low-speed clock, 32.768 kHz / 低速时钟
+![RTC pin reference / RTC 引脚参考](images/clock-rtc-pins.png)
 
-**EN**
+*Additional pin reference; retain the node names when tracing the final schematic. / 补充引脚参考，核对最终原理图时按网络名追踪。*
 
-The RTC uses a **32.768 kHz** crystal across **X32KIN / X32KOUT (pins 24–25)**. A **10 MΩ** resistor is wired across the crystal to allow fine frequency trimming.
+### 2.3 Reset / 复位
 
-- Crystal: YXC X321532768KGD2SI (LCSC **C620155**), X2
-- 10 MΩ across-crystal resistor: LCSC **C7250**, R14
-- Load capacitors: 12 pF (LCSC C519482), C120 / C121
+T1 RESET pin 27 has R13 = 10 kΩ pull-up, C41 = 100 nF, ESD5451N U41 and manual key SW2. The nominal RC product is 1 ms, but reset release also depends on the input threshold and power ramp. It is not a guaranteed 1 ms reset pulse. Verify the reset waveform against rail startup and repeated power cycles.
 
-**中文**
+T1 的 RESET 为 27 脚，电路使用 R13 = 10 kΩ 上拉、C41 = 100 nF、ESD5451N U41 与手动按键 SW2。标称 RC 乘积为 1 ms，但释放时刻还取决于输入阈值和电源上升过程，不能直接称为保证的 1 ms 复位脉宽。应结合各路电源启动及重复上电测量波形。
 
-低速时钟使用 **32.768kHz** 晶振，接 **X32KIN、X32KOUT（24、25 号引脚）**。晶振两端跨接一只 **10MΩ** 电阻，可用于频率微调。
+![Reset circuit / 复位电路](images/reset-circuit.png)
 
-- 晶振：扬兴 X321532768KGD2SI（立创 **C620155**），X2
-- 跨接电阻 10MΩ：立创 **C7250**，R14
-- 匹配电容 12pF（C519482），C120 / C121
+*Original Word image 6. The protection network is design intent, not evidence of a completed system ESD test. / Word 原图 6；保护网络表达设计意图，不代表已完成整机静电验收。*
 
-![RTC crystal](images/clock-rtc-32k-schematic.png)
-![Clock pins](images/clock-rtc-pins.png)
+## 3. DDR Configuration / DDR 配置
 
-### 2.2 Reset / 系统复位
+The S3 variant uses **128 MB DDR3 in-package with a 1.5 V DRAM supply**. R123 = 240 Ω, 1%, connects the DDR configuration/calibration pin 47 to ground. The final POWER sheet notes that VCC-PC/PF are internally connected to VCC-IO on T113-S3. Variant-specific supply requirements must follow the selected device, not a different T113 board example.
 
-**EN**
+S3 型号包含 **128 MB 片内 DDR3，DRAM 使用 1.5 V 供电**；R123 = 240 Ω、1%，将 DDR 配置/校准相关的 47 脚接地。最终 POWER 图页注明 T113-S3 的 VCC-PC/PF 在芯片内部连接至 VCC-IO。供电要求应以所用型号为准，不能照搬其他 T113 板卡。
 
-The RESET signal (pin 27) is pulled up to VCC-IO (VCC-RTC is also acceptable) through a resistor; the official guide recommends 100 kΩ, but **10 kΩ (R13, LCSC C25804)** is used here to reduce resistor variety. RC and TVS devices are kept so the reset line is not disturbed during system-level ESD testing.
+![DDR configuration / DDR 配置](images/dram-config.png)
 
-- A manual reset key **SW2** (TS-1088, LCSC C720477) is added for convenience.
-- Capacitor C41 = 100 nF (LCSC C14663).
-- ESD/TVS diode U41 = ESD5451N (LCSC **C2936977**).
+*Original Word image 13. / Word 原图 13。*
 
-**中文**
+RAM and Flash have different roles. DDR stores runtime data; the 1 Gbit SPI NAND stores the system and files. Unstable memory behavior should prompt checks of the 1.5 V rail, configuration, reset and board assembly before blaming the UI.
 
-系统复位信号（27 脚）可通过电阻上拉到 VCC-IO（或 VCC-RTC），官方建议 100kΩ；这里为减少元器件种类选 **10kΩ（R13，C25804）**。产品设计保留 RC 与 TVS 器件，防止系统级静电测试时复位被干扰。
+RAM 与 Flash 职责不同：DDR 保存运行时数据，1 Gbit SPI NAND 保存系统和文件。若出现内存不稳定，应先检查 1.5 V 电源、配置、复位与装配，再判断是否为界面问题。
 
-- 增加手动复位按键 **SW2**（TS-1088，C720477）；
-- 电容 C41 = 100nF（C14663）；
-- ESD 管 U41 = ESD5451N（**C2936977**）。
+## 4. Power Generation and Decoupling / 电源与去耦
 
-![Reset circuit](images/reset-circuit.png)
+### 4.1 Power domains / 电源域
 
-### 2.3 Power Design / 电源设计
+The board derives four supplies from its 5 V bus: 3.3 V for I/O and peripherals, 1.5 V for DDR, 0.9 V for core/system domains, and 1.8 V for the relevant analog/internal domains. The unused CSI supply in the original reference does not create an additional implemented rail here. Reference current budgets in the old notes are not measured board consumption or guaranteed rail ratings.
 
-**EN**
+板卡由 5 V 总线产生四路电源：3.3 V 供 I/O 与外围电路，1.5 V 供 DDR，0.9 V 供核心及系统域，1.8 V 供相应模拟及内部电源域。原参考中的未用 CSI 电源不代表本板实现了额外电源轨；旧说明中的电流预算不能视为实测功耗或保证的输出能力。
 
-Unlike a simple MCU, the T113-S3 contains many modules that need independent rails: VDD-CORE / VDD-SYS at **0.9 V**, DRAM at **1.5 V** (note: T113-**S3** DRAM uses 1.5 V while T113-**i** uses 1.8 V — do not change this), the audio domain at 1.8 V, and I/O at 3.3 V. The 1.2 V rail belongs to the CSI module which is unused, so it is omitted.
+![EVB power reference / EVB 电源参考](images/power-tree-evb-reference.png)
 
-| Rail / 电源轨 | Current / 电流 | Feeds / 供电对象 |
-|---|---|---|
-| 0.9 V | 2 A | VDD-CPU (CORE), VDD-SYS |
-| 1.5 V | 1 A | VCC-DRAM (internal DDR3) |
-| 1.8 V | ~0.4 A | VCC-PLL, VDD18-DRAM, VCC-LVDS, VCC-RTC, HPVCC |
-| 3.3 V | 2 A | VCC-IO/PD/PE/PF/PG/PC, WiFi, LCD I/O, etc. |
+*Original Word image 7: vendor EVB reference. The EVB's 12 V input stage is not the AuraBar 5 V USB input design. / Word 原图 7：原厂 EVB 参考，其中 12 V 输入级不是 AuraBar 的 5 V USB 输入电路。*
 
-The official EVB power tree (12 V adapter → first-stage DC/DC → 5 V bus → multiple bucks; plus the SoC's internal LDOA/LDOB) is shown for reference. AuraBar is powered from 5 V USB, so the 12 V adapter stage is not needed.
-官方 EVB 电源树（12V 适配器→一级 DC/DC→5V 母线→多路降压，另有 SoC 内部 LDOA/LDOB）仅作参考；AuraBar 由 USB 5V 供电，不需要 12V 适配级。
+![Original power domain image / 原始电源域图](images/power-rails-original.jpeg)
 
-![EVB power tree reference](images/power-tree-evb-reference.png)
+*Original Word image 10, preserved byte-for-byte. / Word 原图 10，按原始字节保留。*
 
-**EN** There are two common ways to generate the rails:
+![Additional power domain copy / 补充电源域图](images/power-domains.jpg)
 
-1. **Integrated PMIC**, e.g. the EA3059 with four independently configurable outputs — compact but harder to hand-solder.
-2. **Discrete DC/DC bucks**, e.g. SY8088AAC — chosen here for hand soldering.
+*Existing re-encoded copy retained for traceability; the preceding figure is the original Word media. / 保留已有重新编码版本用于追溯，上一张为 Word 原始媒体文件。*
 
-**中文** 电源产生一般有两种方案：
+### 4.2 Regulator choice and feedback calculations / 稳压器选型与反馈计算
 
-1. **集成电源芯片**（如 EA3059，支持 4 路独立输出）—— 紧凑但不好手工焊接；
-2. **四路独立降压芯片**（如 SY8088AAC）—— 为方便焊接，选择本方案。
+An integrated PMIC can consolidate supply generation; separate regulators make prototype assembly and per-rail inspection straightforward. AuraBar's final BOM contains **four SY8088AAC devices, U1–U4**, with 2.2 µH L1–L4. The historical 1.8 V LDO option is not the current configuration.
 
-![Integrated PMIC option (not used)](images/power-pmic-option.png)
+集成 PMIC 可整合供电，独立稳压器则便于原型装配和逐路检查。AuraBar 最终 BOM 使用 **四颗 SY8088AAC，U1–U4**，配套 L1–L4 为 2.2 µH。历史上的 1.8 V LDO 方案不是当前配置。
 
-**EN**
+![PMIC alternative / PMIC 备选方案](images/power-pmic-option.png)
 
-The 1.8 V rail draws little current and could use an XC6206P182MR LDO, while the other rails use SY8088AAC (1 A) / SY8089AAAC (2 A). In the final design **all four rails use SY8088AAC (U1–U4)** — verified to work in practice.
+*Original Word image 8: alternative considered, not populated as the final power architecture. / Word 原图 8：设计阶段备选，不是最终电源架构。*
 
-- Inductor: 2.2 µH (LCSC C383369 class; BOM uses MGFL2012F2R2MT, L1–L4)
-- Output capacitor: 10 µF / 25 V 0603 (LCSC C96446 class)
-- Output voltage divider: **Vout = 0.6 × (1 + RH/RL)**
+![Early discrete regulators / 早期独立稳压方案](images/power-dcdc-discrete.png)
 
-| Rail | IC | RH (top) / RL (bottom) |
-|---|---|---|
-| 5 V → 3.3 V | U1 SY8088AAC | R1 150 kΩ / R2 68 kΩ |
-| 5 V → 1.5 V | U2 SY8088AAC | R5 200 kΩ / R3 300 kΩ |
-| 5 V → 0.9 V | U3 SY8088AAC | R8 300 kΩ / R4 150 kΩ |
-| 5 V → 1.8 V | U4 SY8088AAC | R7 150 kΩ / R6 300 kΩ |
+*Original Word image 9: early designators and an XC6206 1.8 V LDO. Use the final table and sheet below for current parts. / Word 原图 9：包含早期位号及 XC6206 1.8 V LDO，当前器件按下表与最终图页核对。*
 
-**中文**
+Using the design equation `Vout = 0.6 * (1 + Rupper/Rlower)`, trace Rupper from output to FB and Rlower from FB to ground. The final netlist gives:
 
-1.8V 需求电流较低，原本可用 XC6206P182MR LDO，其余几路用 SY8088AAC(1A) 与 SY8089AAAC(2A)；最终设计 **四路全部使用 SY8088AAC（U1–U4）**，实测可用。
+按设计公式 `Vout = 0.6 * (1 + Rupper/Rlower)`，上臂从输出接到 FB，下臂从 FB 接地。最终网表对应如下：
 
-- 电感 2.2µH（BOM 为麦捷 MGFL2012F2R2MT，L1–L4）；
-- 输出电容 10µF/25V 0603；
-- 分压公式 **Vout = 0.6×(1+RH/RL)**。
+| Rail / 电源轨 | IC | Upper / 上臂 | Lower / 下臂 | Calculated nominal / 标称计算 |
+|---|---|---|---|---|
+| 3V3 | U1 | R2 = 680 kΩ | R1 = 150 kΩ | 3.32 V |
+| 1V5 | U2 | R3 = 300 kΩ | R5 = 200 kΩ | 1.50 V |
+| 0V9 | U3 | R4 = 150 kΩ | R6 = 300 kΩ | 0.90 V |
+| 1V8 | U4 | R8 = 300 kΩ | R7 = 150 kΩ | 1.80 V |
 
-| 电源 | 芯片 | 上拉 RH / 下拉 RL |
-|---|---|---|
-| 5V→3.3V | U1 | 150kΩ / 68kΩ |
-| 5V→1.5V | U2 | 200kΩ / 300kΩ |
-| 5V→0.9V | U3 | 300kΩ / 150kΩ |
-| 5V→1.8V | U4 | 150kΩ / 300kΩ |
+These calculations explain nominal setpoints; resistor tolerance, reference accuracy, layout and load affect measured voltage. Earlier handbook values incorrectly listed R2 as 68 kΩ and reversed several divider roles. The BOM and netlist both identify R2 as 680 kΩ.
 
-![Discrete DC/DC rails](images/power-dcdc-discrete.png)
+计算用于解释标称设定值，实测电压仍受电阻误差、基准精度、布局与负载影响。此前手册误写 R2 为 68 kΩ，并颠倒了部分分压电阻的角色；BOM 与网表均记载 R2 为 680 kΩ。
 
-**EN**
+![Final POWER sheet / 最终 POWER 图页](images/schematic/03-power.png)
 
-*Internal LDOs (not used):* the SoC integrates LDOA (default 1.8 V / 200 mA, can feed VCC-PLL, VCC18-DRAM, VCC-LVDS) and LDOB (default 1.35 V / 400 mA, can feed VCC-DRAM, though external DC/DC is recommended because DDR current is high). LDOIN accepts 2.4–3.63 V. Since the internal LDOs are unused, these pins are left floating.
+*Final schematic page 3. Open the [vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=3) to inspect connections at full detail. / 最终原理图第 3 页，细节见矢量 PDF。*
 
-**中文**
+### 4.3 Filtering and layout / 滤波与布局
 
-*内部 LDO（未使用）：* SoC 集成 LDOA（默认 1.8V/200mA，可给 VCC-PLL、VCC18-DRAM、VCC-LVDS 供电）与 LDOB（默认 1.35V/400mA，可给 VCC-DRAM 供电，但 DDR 功耗大建议外部 DC/DC）；LDOIN 输入范围 2.4–3.63V。本设计未用内部 LDO，相关引脚悬空处理。
+Place local decoupling near each supply pin and keep return paths short. Effective ceramic capacitance depends on dielectric, DC bias and package; capacitance values alone do not prove ripple performance. Avoid routing sensitive feedback or audio traces through switching-current loops. Check inductor saturation, regulator thermal behavior and stability with the actual load.
 
-![Power domains](images/power-domains.jpg)
+去耦应靠近各电源引脚，回流路径尽量短。陶瓷电容的有效容量受介质、直流偏压和封装影响，标称容值本身不能证明纹波性能。敏感反馈与音频走线应避开开关电流回路，并按实际负载检查电感饱和、稳压器温升与稳定性。
 
-### 2.4 Power Ripple / 电源纹波处理
+![Decoupling reference / 去耦参考](images/power-decoupling.png)
 
-**EN**
+*Original Word image 11. / Word 原图 11。*
 
-The T113 is sensitive to rail ripple, so bypass capacitors are added on every rail: core, DRAM and analog rails get a mix of µF- and nF-class capacitors on both input and output; I/O rails get nF-class capacitors only.
+The design includes 0 Ω R79 between AGND and GND and a GZ1608D601TF ferrite bead L8, specified in the source as 600 Ω at 100 MHz, in the analog supply path. These organize/filter return and supply paths; they do not provide galvanic isolation. C82/C83 are 470 nF in the final BOM. Tune noise mitigation from measurements rather than assuming a bead suppresses every interference frequency.
 
-**中文**
+设计在 AGND 与 GND 之间使用 0 Ω R79，模拟供电路径使用 GZ1608D601TF 磁珠 L8，原资料规格为 600 Ω@100 MHz。这些器件用于组织回流与滤波，不提供电气隔离。最终 BOM 中 C82/C83 为 470 nF。应依据实测调整噪声措施，不能认为一颗磁珠能抑制所有干扰频段。
 
-T113 对各路电源纹波要求较高，需在各路电源添加旁路电容：核心、DRAM、模拟信号电源的输入输出均用 µF 与 nF 搭配；IO 外设部分只加 nF 级电容。
+The original notes also discuss the SoC's internal LDOs. They are not used as the final four-rail supply solution; do not substitute them without checking the relevant pin requirements, current budget, sequencing and device documentation.
 
-![Decoupling capacitors](images/power-decoupling.png)
+原说明还讨论了主控内部 LDO，但最终四路供电方案未采用它们。若要替换，需重新核对引脚要求、电流预算、时序与芯片资料。
 
-**EN Special audio treatment / 音频部分特别处理：**
+## 5. Final Controller Sheet / 最终主控图页
 
-- AGND and GND are joined through a **0 Ω resistor** to separate analog and digital ground (R79 / R127 in different sheet revisions).
-- AVCC is isolated through a **ferrite bead**, chosen primarily by impedance and current rating; a 0603 bead rated **600 Ω @ 100 MHz** (Sunlord GZ1608D601TF, L8) is used. For a shipping product, the bead must be matched to the measured EMI interference frequency.
-- VRA1 and VRA2 get nF/µF low-ESR capacitors to ground for high-frequency noise; **470 nF** is the default here (C82 / C83).
+![Original controller schematic / 原始主控电路图](images/mcu-final-schematic.png)
 
-These values must be tuned on the manufactured board according to the measured audio quality and EMI results — layout, fabrication and application all change the interference.
-AGND 与 GND 之间用 **0Ω 电阻**做数模地隔离；AVCC 用**磁珠**隔离（0603、600Ω@100MHz，顺络 GZ1608D601TF，L8；量产时需按 EMI 实测干扰频率适配磁珠）；VRA1/VRA2 加 nF 与 µF 低 ESR 电容接地滤高频，默认 **470nF**（C82/C83）。这些器件需在板卡生产后结合实际音频效果与 EMI 测试调整。
+*Original Word image 12: controller design at the time of the notes. / Word 原图 12：设计说明阶段的主控电路。*
 
-### 2.5 Final MCU Schematic / 主控最终设计
+![Final T113S3 sheet / 最终 T113S3 图页](images/schematic/01-t113s3.png)
 
-**EN** The complete T113-S3 with audio ferrite bead, ground isolation and all power pins is shown below.
+*Final schematic page 1: controller, clocks, reset and decoupling. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=1). / 最终第 1 页：主控、时钟、复位与去耦。*
 
-**中文** 含音频磁珠、地隔离与全部电源引脚的主控原理图如下。
+Read the controller sheet together with POWER and the netlist: net labels connect circuits across sheets. A disconnected-looking symbol is not necessarily an unconnected supply, and a package pin number is not a Linux GPIO number. Confirm pin multiplexing in the running BSP before using an interface.
 
-![Final MCU schematic](images/mcu-final-schematic.png)
+主控图页需要与 POWER 和网表一起阅读：网络标签连接不同图页。图中看似分离的符号不一定表示电源未连，封装脚号也不等于 Linux GPIO 编号。使用接口前应核对运行 BSP 中的复用配置。
 
----
+## 6. Storage and Recovery / 存储与恢复
 
-## 3. DRAM / 内置 DRAM 配置
+The board uses **Winbond W25N01GVZEIG U6, 1 Gbit SPI NAND**, connected to SPI0. One Gbit corresponds to 128 MiB of nominal main-array storage; usable filesystem space is lower after system partitions, metadata and bad-block handling. Driver support must account for NAND geometry, ECC and bad-block management. Compatibility is more than matching capacity and pin count.
 
-**EN**
+板卡使用 **华邦 W25N01GVZEIG U6、1 Gbit SPI NAND**，接至 SPI0。1 Gbit 对应主阵列标称 128 MiB，系统分区、元数据与坏块处理会占用空间。驱动必须正确处理 NAND 几何、ECC 和坏块；容量与引脚相同并不代表可以直接替换。
 
-The T113-S3 has **128 MB DDR3 in-package**, with VCC-DRAM at **1.5 V**. Per the official hardware design recommendation, pin 47 is pulled to ground through a **240 Ω ±1% resistor (R123, LCSC C23350)**. (The corresponding configuration on T113-i / 1.8 V parts differs — follow the datasheet.)
+![Flash and recovery key / Flash 与恢复按键](images/spi-nand-flash.png)
 
-**中文**
+*Original Word image 14. / Word 原图 14。*
 
-T113-S3 内置 **128MB DDR3**，VCC-DRAM 供电 **1.5V**。按官方硬件设计建议，在 **Pin47 通过 240Ω、精度 1% 的电阻下拉（R123，C23350）**。（T113-i / 1.8V 版本配置不同，以手册为准。）
+The final circuit pulls /WP and /HOLD high through R145/R93, both 10 kΩ, and uses R122 on /CS. /WP behavior depends on the device's protection registers and operating mode; it is not an unconditional “low means read-only” switch in every configuration. /HOLD is a serial-interface control whose behavior also depends on mode; it must not be confused with cancelling an internal NAND operation. Check the selected device documentation and driver configuration.
 
-![DRAM config resistor](images/dram-config.png)
+最终电路通过 R145/R93（均 10 kΩ）上拉 /WP 与 /HOLD，/CS 使用 R122。/WP 行为与保护寄存器及工作模式有关，不能概括为任何配置下“拉低就只读”。/HOLD 控制串行接口，行为也与模式有关，不等于取消 NAND 内部操作；应结合所用器件手册与驱动配置核查。
 
----
+**SW1 is the Flash/FEL key; SW2 is reset.** Holding SW1 during the intended startup procedure affects SPI0 MOSI and prevents normal Flash detection, providing a recovery entry. Exact boot-ROM behavior and key timing should be verified on the selected image. An application upgrade archive is not a full bootable recovery image; see [installation and rollback](../../docs/guides/installation.md).
 
-## 4. Flash / 闪存
+**SW1 为 Flash/FEL 按键，SW2 为复位。**在相应上电流程中按住 SW1，会影响 SPI0 MOSI 与正常 Flash 识别，从而提供恢复入口。具体 Boot ROM 行为与按键时序需在所用系统上验证。应用升级压缩包不是完整可启动恢复镜像，操作见[安装与回退](../../docs/guides/installation.md)。
 
-**EN**
+![Final FLASH sheet / 最终 FLASH 图页](images/schematic/06-flash.png)
 
-The T113 supports eMMC and SPI NOR / SPI NAND flash. A **Winbond W25N01GVZEIG, 1 Gbit SPI NAND (U6, LCSC C90768)** is selected from the Allwinner-validated list (which also includes GigaDevice GD5F series, Macronix MX35LF series, ESMT F50L series, etc.).
+*Final page 6. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=6). / 最终第 6 页。*
 
-- SPI CS / CLK / MOSI / MISO go to the SoC on **SPI0 (pins 14–19 area, PF group)**.
-- **WP and HOLD are tied high to 3.3 V** (10 kΩ R145 / R93) and are not driven by the SoC:
-  - **WP (Write Protect)**: when pulled low the chip becomes read-only, blocking write/erase/program operations.
-  - **HOLD**: when low while CS is low, the current SPI operation is paused, DO goes high-Z, and DI/CLK are ignored; communication resumes at the pause point once HOLD goes high.
-  - Both must stay high for normal operation.
-- An extra key **SW1** is added on the SPI0 MOSI line: **if SW1 is held during power-on, the SoC cannot detect the flash and enters FEL firmware-burning mode.**
+## 7. USB and Supply Direction / USB 与供电方向
 
-**中文**
+### 7.1 Connector selection / 连接器选型
 
-T113 支持 eMMC 与 SPI NOR / SPI NAND。从全志验证型号清单（兆易 GD5F 系列、旺宏 MX35LF 系列、ESMT F50L 系列等）中选择华邦 **W25N01GVZEIG，1Gbit SPI NAND（U6，C90768）**。
+AuraBar uses two KH-TYPE-C-16P connectors, USB9 and USB10. The 16-pin footprint supports the USB 2.0 connections used here. Contact count alone does not establish speed, PD support, cable behavior or a complete Type-C role implementation.
 
-- SPI 的 CS/CLK/MOSI/MISO 直接接主控 **SPI0（PF 组引脚）**；
-- **WP、HOLD 直接 3.3V 上拉（10kΩ R145/R93），不接 T113**：WP 拉低进入只读模式，禁止写入/擦除/编程；HOLD 在 CS 为低时拉低会暂停 SPI 通信、DO 高阻、忽略 DI/CLK，拉高后从暂停点继续。正常使用两脚均须为高；
-- 额外增加按键 **SW1**：上电时按住 SW1，芯片检测不到 Flash，即进入 **FEL 烧录模式**。
+AuraBar 使用两只 KH-TYPE-C-16P 连接器，位号为 USB9 与 USB10。16 针封装满足本板使用的 USB 2.0 连接，但触点数量本身不能证明速率、PD、线缆行为或完整 Type-C 角色实现。
 
-![SPI NAND flash and FEL key](images/spi-nand-flash.png)
+![24-contact connector example / 24 触点连接器示例](images/typec-24pin.png)
 
----
+*Additional connector reference; not the board's selected footprint. / 补充连接器参考，不是本板所选封装。*
 
-## 5. USB / USB 接口
+![16-contact connector example / 16 触点连接器示例](images/typec-16pin.png)
 
-**EN**
+*Additional reference illustrating the selected connector class; verify the actual part drawing. / 补充参考，展示所用连接器类型，尺寸仍按具体器件图纸核对。*
 
-Two parts of the board need USB: a firmware/ADB port and a power port. Common USB-C connector options are 24-pin (full-featured), 16-pin (USB 2.0 only — no need to waste a 24-pin part when the MCU lacks USB 3.0), and 6-pin (power only, for toys / toothbrushes). This board uses two **KH-TYPE-C-16P** connectors (LCSC C709357):
+![Power-only connector example / 仅供电连接器示例](images/typec-6pin.png)
 
-- **USB10 → USB0 (OTG)**: firmware burning and ADB debugging. VBUS = VIN5V (debug supply).
-- **USB9 → USB1 (Host)**: reserved for future USB functions; its VBUS is the main **5 V** supply.
-- **CC1 / CC2 each use a 5.1 kΩ pull-down to ground (R141/R142, R113/R114)** to advertise sink attachment. The documented input is 5 V. Rd resistors alone do not implement USB Power Delivery negotiation or establish support for higher input voltages.
-- The two VBUS paths are OR-ed through **Schottky diodes D22 / D23 (LMBR240FT1G, SOD-123FL)** to isolate the supplies and prevent back-powering the host PC. Selection: low forward voltage Vf (less loss) and If ≥ the maximum system current (e.g. 2 A).
-- USB data pairs are protected by ESD5451N TVS arrays (U33–U36).
-- A power indicator LED (LED3 + 10 kΩ R115) shows power is present.
+*Additional six-contact reference for the original comparison. / 补充六触点参考，用于保留原设计的方案对比。*
 
-**中文**
+### 7.2 Port roles and CC resistors / 接口角色与 CC 电阻
 
-板上两部分需要 USB：烧录/ADB 口与供电口。常见 Type-C 有 24Pin（全功能）、16Pin（仅 USB2.0，MCU 无 USB3.0 时不浪费 24Pin）、6Pin（仅取电，用于玩具、牙刷）。本板使用两个 **KH-TYPE-C-16P（C709357）**：
-
-- **USB10 接 USB0（OTG）**：烧录与 ADB 调试，VBUS 为 VIN5V（调试供电）；
-- **USB9 接 USB1（Host）**：预留扩展其它 USB 功能，VBUS 为**主供电 5V**；
-- **CC1/CC2 各用 5.1kΩ 电阻接地（R141/R142、R113/R114）**：下拉电阻用于声明取电端连接，当前文档的输入为 5V。仅有 Rd 电阻不构成 USB PD 协商能力，也不能据此宣称支持更高输入电压；
-- 两路 VBUS 通过 **肖特基二极管 D22/D23（LMBR240FT1G，SOD-123FL）串联隔离**，避免外部供电倒灌电脑；选型看正向压降 Vf 越低越好、电流 If ≥ 系统最大电流（如 2A）；
-- USB 数据线用 ESD5451N（U33–U36）做静电保护；
-- 电源指示灯 LED3 + 10kΩ R115，方便判断是否通电。
-
-![Debug Type-C](images/usb-debug-typec.png)
-![Power OR-ing diode and indicator](images/power-oring-diode.png)
-
-Type-C connector comparison / Type-C 接口对比：[24-pin](images/typec-24pin.png) · [16-pin](images/typec-16pin.png) · [6-pin](images/typec-6pin.png)
-
----
-
-## 6. LED and Keys / LED 与按键
-
-**EN** Any GPIO-capable pins that do not conflict with a peripheral can be used. In this project **LED1 → PD11** (LED4, NCD0603B1, with 10 kΩ R124) and **BTN1 → PD10** (SW5 with 100 nF debounce C124 and ESD U42).
-
-**中文** 任意支持 GPIO 且不占用外设的引脚均可：**LED1 接 PD11**（LED4，NCD0603B1，串 10kΩ R124）；**BTN1 接 PD10**（SW5，100nF 消抖 C124，ESD 管 U42）。
-
-![LED and button](images/led-and-button.png)
-
----
-
-## 7. UART / 串口
-
-**EN**
-
-The T113 provides six UARTs; **UART0 is the default debug console** (remappable in software; GPIO mux is described in datasheet §4.3). Two UARTs are used on this board:
-
-- **UART1 (PG6–PG9, with RTS/CTS)** → the RTL8723DS Bluetooth channel (see §9).
-- **UART3 (PB8/PB9)** → a runtime log header, a ZX-MX1.25-3PWT 3-pin terminal (U24, LCSC C7430469) with ESD5451N protection (U37/U38). Connecting here shows the boot/runtime log.
-- UART0 (pin 33/35) is wired to the optional BLE Mesh module socket U5 (MX-02), see §9b.
-
-**中文**
-
-T113 内置 6 组 UART，**UART0 默认用于 Debug**（可软件修改；IO 映射见数据手册 4.3 节 GPIO Multiplex Function）。本板用到：
-
-- **UART1（PG6–PG9，含 RTS/CTS）**：接 RTL8723DS 蓝牙（见第 9 节）；
-- **UART3（PB8/PB9）**：运行日志，预留 ZX-MX1.25-3PWT 3P 端子（U24，C7430469），带 ESD5451N（U37/U38）保护，接此口可查看运行日志；
-- UART0（33/35 脚）：接 BLE Mesh 模组预留座 U5（MX-02），见 9b。
-
-![UART3 log port](images/uart3-debug-port.png)
-
----
-
-## 8. Audio / 音频接口
-
-**EN** The T113-S3 provides 2 I2S digital audio interfaces, 1 analog output (HPOUT) and 3 analog inputs (MICIN, FMIN, LINEIN). This design uses **MICIN for the microphone** and **HPOUT for the speaker amplifier**.
-
-**中文** T113-S3 支持 2 路 I2S 数字音频、1 路模拟输出 HPOUT、3 路模拟输入（MICIN、FMIN、LINEIN）。本设计用 **MICIN 作麦克风输入**，**HPOUT 接功放驱动扬声器**。
-
-### 8.1 Microphone / MIC 电路
-
-**EN**
-
-A classic electret-condenser microphone biasing circuit is used, with the GMI4015P-2C-42dB mic (LCSC **C233292**, MIC2).
-
-- **C46 / C47 (100 nF)** — DC-blocking / AC-coupling caps. At 1 kHz, the capacitive reactance of 100 nF is approximately 1.59 kΩ: Xc = 1/(2πfC). The resulting high-pass response depends on the surrounding input impedance and must be evaluated for the actual signal chain.
-- **R27 (2 kΩ) / R34 (1 kΩ)** — MIC bias from AVCC. R27 sets the bias current and therefore sensitivity: too large gives too small current and low output level (weak sounds are lost as noise); too small raises noise. 2 kΩ is the usual value; 1 kΩ gives higher sensitivity.
-- **C87 (100 pF)** — differential-mode high-frequency noise filter (>10 MHz switch/crosstalk noise sees low impedance and is shorted).
-- **R148 (75 Ω) + C143 (10 µF)** — RC low-pass on the AVCC supply, blocking switching-noise and clock interference into the mic chain.
-- Inputs arrive at MIC_IN_3P / MIC_IN_3N (pins 87/88) as a differential pair.
-
-**中文**
-
-参考经典驻极体电容麦电路，麦克风为 GMI4015P-2C-42dB（**C233292**，MIC2）：
-
-- **C46/C47（100nF）**：隔直通交，100nF 在 1kHz 时容抗约为 1.59kΩ，计算式为 Xc=1/(2πfC)。高通响应取决于周边输入阻抗，需按实际信号链评估；
-- **R27（2kΩ）/R34（1kΩ）**：由 AVCC 提供偏置；R27 影响偏置电流即灵敏度——过大会使输入电流过小、输出电平偏低、小声被当噪声丢弃；一般取 2kΩ，高灵敏度可选 1kΩ；
-- **C87（100pF）**：滤除信号线间差模高频噪声（对 >10MHz 呈低阻短路）；
-- **R148（75Ω）+ C143（10µF）**：AVCC 电源 RC 低通，阻隔开关电源噪声与数字时钟干扰；
-- 信号以差分对进入 MIC_IN_3P / MIC_IN_3N（87/88 脚）。
-
-![MIC reference](images/mic-reference-circuit.png)
-![MIC schematic](images/mic-circuit.png)
-
-### 8.2 Speaker Amplifier / 扬声器功放
-
-**EN**
-
-Amplifier classes compared: Class A is simple and clean-sounding but inefficient and hot; Class B is efficient but suffers crossover distortion; Class AB combines both advantages; Class D uses PWM for high efficiency and power but needs filtering and can introduce digital noise.
-
-The early design used an LM4890S; the **final BOM uses an LM4871 (U53, SOIC-8, LCSC C7494970)** — chosen because the small LM4890 package is harder to assemble; LM4871 is the recommended alternative. It drives an **8 Ω speaker** via the HC-1.25-2PWT 2-pin terminal CN2.
-
-- **R135 (22 Ω) with C135 (100 nF)** — classic low-pass to ground, filtering highs at HPOUT.
-- **C142 (470 nF)** — input coupling; blocks DC and forms a high-pass with R136 (20 kΩ).
-- **C138 (1 µF)** — Bypass/reference pin filter.
-- **C139 (10 µF)** — supply filtering.
-- **R149 (20 kΩ) / R136** — closed-loop gain feedback network.
-- **R138 (100 kΩ)** — pull-down defining the pin level before boot.
-- **HPOUT_FB (pin 100)** — feedback unused; per datasheet tied through 100 nF (C91) to ground.
-- HPOUTR/HPOUTL are stereo outputs; two amplifiers/speakers are possible, but typical compact devices use one speaker (HPOUTR is routed here).
-- ESD5451N (U49/U50) protects the speaker terminal; the amplifier and speaker side reference AGND.
-
-**中文**
-
-功放类别对比：A 类简单音质好但效率低易发热；B 类效率高功率大但有交越失真；AB 类兼顾音质与效率；D 类 PWM 调制效率高功率大但需滤波器、易有数字噪声。
-
-早期选 LM4890S，**最终 BOM 采用 LM4871（U53，SOIC-8，C7494970）**——LM4890 封装小、装配难，LM4871 是推荐替代。经 HC-1.25-2PWT 2P 端子 CN2 驱动 **8Ω 扬声器**：
-
-- **C135 100nF 串 R135 22Ω 接地**：典型低通，滤高频；
-- **C142（470nF）**：输入耦合隔直，并与 R136（20kΩ）构成高通；
-- **C138（1µF）**：Bypass 参考电源脚滤波；
-- **C139（10µF）**：电源滤波；
-- **R149（20kΩ）与 R136**：设置闭环增益的反馈网络；
-- **R138（100kΩ）**：下拉，确定未启动时引脚电平；
-- **HPOUT_FB（100 脚）**：未用反馈，按手册经 100nF（C91）接地；
-- HPOUTR/HPOUTL 为左右声道，可接两颗功放两只喇叭，紧凑设备通常只接一只（本设计走 HPOUTR）；
-- 喇叭端子由 ESD5451N（U49/U50）保护，功放与喇叭侧参考 AGND。
-
-![LM4890 reference (early)](images/amplifier-lm4890-reference.png)
-![Final amplifier output](images/amplifier-output.png)
-
----
-
-## 9. WiFi / WiFi 与蓝牙
-
-**EN**
-
-A Realtek **RTL8723DS Wi-Fi + BT module (U11, LCSC C2920724)** is used. Wi-Fi runs over SDIO and Bluetooth over UART; BT is not used in the current product but is wired for future use. Of the module's pins (power, enable, Wi-Fi, BT UART, BT audio PCM, low-power), only power, enable, Wi-Fi SDIO and BT UART are connected.
-
-- AGND → ground; WL_BT_ANT → 2.4 GHz ceramic antenna AN2051-245 (L10, LCSC C99727).
-- VBAT_IN → 3.3 V; WL_DIS (Wi-Fi enable) pulled high; BT_DIS (BT enable) pulled high.
-- HOST_WAKE_BT / BT_WAKE_HOST (classic-BT wake) not needed without sleep — left unconnected.
-- WL_HOST_WAKE not needed — pulled high by default; SUSCLK_IN (low-power clock input) unused, pulled high to avoid floating.
-- PCM (BT audio) unused; MAIN_XTAL_IN = NC; VBAT_EN (NC pin) left floating.
-- SDIO D0–D3 / CMD / CLK connect to the SoC **SDC1**; a 33 Ω series resistor (R90) is placed on CLK.
-- BT UART (TX/RX/RTS/CTS) connects to SoC **UART1**.
-- RN2/RN3 are 10 kΩ resistor arrays for the pulls; C55 = 10 µF at VDDIO; C54/C63 = 10 µF/100 nF at VBAT.
-
-| Signal | RTL8723DS | T113-S3 pin |
-|---|---|---|
-| SDC1_CLK | CLK | PG0 (pin 120) |
-| SDC1_CMD | CMD | PG1 |
-| SDC1_D0–D3 | D0–D3 | PG2–PG5 |
-| UART1_TX / RX | UART_OUT / UART_IN | PG6 / PG7 |
-| UART1_RTS / CTS | UART_RTS / UART_CTS | PG8 / PG9 |
-
-**中文**
-
-WiFi 选用 Realtek **RTL8723DS WiFi+蓝牙模组（U11，C2920724）**：WiFi 走 SDIO，蓝牙走 UART；当前产品未用蓝牙，但先接上。模组引脚含电源、使能、WiFi、蓝牙 UART、蓝牙音频、低功耗等，本设计只接电源、使能、WiFi、蓝牙 UART：
-
-- AGND 接地；WL_BT_ANT 接 2.4G 陶瓷天线 AN2051-245（L10，C99727）；
-- VBAT_IN 接 3.3V；WL_DIS（WiFi 使能）上拉使能；BT_DIS（蓝牙使能）上拉使能；
-- HOST_WAKE_BT / BT_WAKE_HOST 为经典蓝牙唤醒，不做睡眠不接；
-- WL_HOST_WAKE 用不到，默认上拉；SUSCLK_IN 低功耗时钟未用，上拉固定高电平避免悬空；
-- PCM 蓝牙音频未用留空；MAIN_XTAL_IN 为 NC；VBAT_EN（NC 脚）悬空；
-- SDIO D0–D3/CMD/CLK 接主控 **SDC1**，CLK 串 33Ω 电阻 R90；
-- 蓝牙 UART（TX/RX/RTS/CTS）接主控 **UART1**；
-- RN2/RN3 为 10kΩ 排阻上拉，VDDIO 处 C55=10µF，VBAT 处 C54/C63 为 10µF/100nF。
-
-![WiFi module](images/wifi-module-rtl8723ds.png)
-![WiFi to MCU wiring](images/wifi-mcu-connections.png)
-
-### 9b. BLE Mesh socket (optional) / BLE Mesh 预留座
-
-**EN**
-
-An **MX-02** module footprint (U5) is reserved on **UART0**, with two mode-control pins on PD05/PD06: per the on-sheet note, **PD05/PD06 = 0 → normal mode (can receive and transmit / connect); = 1 → transparent-transmission mode (transmit only, cannot receive)**. This socket is reserved for the future BLE-Mesh multi-device central-control feature; it can be left unpopulated. Firmware for ESP-based BLE modules can be written with the Espressif Flash Download Tool (see `/tools`).
-
-**中文**
-
-在 **UART0** 上预留 **MX-02** 模组封装（U5），PD05/PD06 为模式脚：按图中注释，**0 = 正常模式（可收发连接数据）；1 = 透传模式（只能发送，不能接收）**。该座为后续 BLE Mesh 多设备中控功能预留，可不贴。若该模组为 ESP 系，可用乐鑫 Flash Download Tool 烧录（见 `/tools`）。
-
----
-
-## 10. Display, Touch and Backlight / 屏幕、触摸与背光
-
-**EN**
-
-The T113-S3 supports RGB888/RGB666, dual-channel LVDS (pin-muxed with RGB) and MIPI DSI (also pin-muxed). This project uses a **6.9-inch** bar panel:
-
-- **Display: MIPI DSI**, 280(H) × 1424(V), through an **FPC 30-pin 0.5 mm pitch** connector (Xunpu FPC-05F-30PH20, FPC2, LCSC C2856808).
-- **Touch: I2C (Goodix GT911 class)**, through an **FPC 6-pin 0.5 mm top-contact** connector (AFC07-S06ECA-00, FPC7, LCSC C262579).
-
-**中文**
-
-T113-S3 支持 RGB888/RGB666、双路 LVDS（与 RGB 复用引脚）、MIPI DSI（同样复用）。本项目屏幕为 **6.9 寸长条屏**：显示部分 **MIPI DSI**，分辨率 280×1424，用 **FPC 30pin、间距 0.5mm** 端子（讯普 FPC-05F-30PH20，FPC2，C2856808）；触摸部分 **I2C（GT911 类）**，用 **6pin 0.5mm 上接端子**（AFC07-S06ECA-00，FPC7，C262579）。
-
-### 10.1 MIPI screen connector / 屏幕端子
-
-**EN**
-
-FPC2 carries 4 MIPI data lanes (MIPI_0–3 P/N), the differential clock (LCD_CLK_P/N), MIPI_LCD_TE (tearing-effect output from the LCD), MIPI_LCD_RST (active-low reset from the SoC), LCD_VCC (3.3 V, with 22 µF C132 / 1 µF C133 bulk), and the backlight pins LEDA (anode) / LEDK (cathode, two pads). Pins 1–7 and inter-lane pins are GND.
-
-**中文**
-
-FPC2 包含 4 组 MIPI 数据通道（MIPI_0–3 P/N）、差分时钟 LCD_CLK_P/N、MIPI_LCD_TE（LCD 输出的 TE 状态脚）、MIPI_LCD_RST（主控输出，拉低复位）、LCD_VCC（3.3V，配 22µF C132 与 1µF C133）、背光 LEDA（阳极）/LEDK（阴极，两脚）。1–7 脚及各通道间为 GND。
-
-![MIPI FPC30](images/mipi-lcd-fpc30.png)
-
-### 10.2 Touch (I2C) / TP 设计
-
-**EN**
-
-I2C outputs are open-drain, so SDA/SCL (plus RST/INT) are pulled up to 3.3 V through a 10 kΩ resistor array (RN1). FPC7 pinout: 1 INT, 2 GND, 3 SDA, 4 SCL, 5 RST, 6 3.3 V (pins 7/8 GND). TP_SCL/TP_SDA/TP_INT/TP_RST run to PB-port I2C pins (44/45/42/43).
-
-**中文**
-
-I2C 输出级为开漏结构，SDA/SCL（及 RST/INT）经 10kΩ 排阻 RN1 上拉至 3.3V。FPC7 线序：1 INT、2 GND、3 SDA、4 SCL、5 RST、6 3.3V（7/8 脚 GND）。TP_SCL/SDA/INT/RST 接 PB 口 I2C 引脚（44/45/42/43 脚）。
-
-![Touch FPC6 and pulls](images/touch-i2c-fpc6.png)
-
-### 10.3 Backlight / 背光
-
-**EN**
-
-The panel backlight is two strings of four LEDs each. Per the panel datasheet the recommended forward current is ~40 mA at 12 V forward voltage; to extend panel life the current is set lower, **~20 mA**. The boost LED driver selection criteria: single channel, PWM dimming, ~1 MHz switching. An **MT9201 (U52, SOT-23-6, LCSC C182966)** boost converter designed for multi-string LED driving is used.
-
-- **Rcs = 10 Ω (R121)** sets the LED current to within 20 mA.
-- **Cin / Cout = 1 µF (C141 / C119)**; use X7R or low-ESR dielectrics to reduce noise.
-- **Cout voltage rating must be high (>30 V)**: with no panel attached the open-circuit output voltage can run high and puncture a low-rated cap.
-- The freewheeling diode D22 (LMBR240FT1G) is rated ≥ 30 V / 500 mA; inductor L18 = 10 µH (WPN201610H100MT).
-- **EN has a 10 kΩ pull-down (R120)** to avoid screen flashing during power-up; LCD_PWM (pin 52) drives EN for PWM dimming.
-- LEDA/LEDK route to FPC2 pins 30 / 28–29.
-
-**中文**
-
-屏幕背光为两串、每串 4 颗 LED；按屏幕手册正向电流建议 40mA、正向电压 12V。为延长寿命，在不影响显示效果下把背光电流设低至约 **20mA**。LED 驱动选型要点：单通道、支持 PWM 调光、频率约 1MHz。采用专为多串 LED 设计的升压转换器 **MT9201（U52，SOT-23-6，C182966）**：
-
-- **Rcs = 10Ω（R121）**：将输出电流控制在 20mA 内；
-- **Cin/Cout = 1µF（C141/C119）**：优选 X7R 或低 ESR 电容以降低噪声；
-- **Cout 耐压要高（>30V）**：未接屏时空载输出电压过高，容易击穿低耐压电容；
-- 续流二极管 D22（LMBR240FT1G）需 30V/500mA 以上；电感 L18 = 10µH（WPN201610H100MT）；
-- **EN 脚加 10kΩ 下拉（R120）**，防止上电过程闪屏；LCD_PWM（52 脚）接 EN 实现 PWM 调光；
-- LEDA/LEDK 分别接 FPC2 的 30 脚与 28/29 脚。
-
-![MT9201 reference](images/backlight-mt9201-reference.png)
-![Backlight schematic](images/backlight-mt9201.png)
-
----
-
-## 11. Key Component Summary / 关键器件汇总
-
-| Function / 功能 | Part / 型号 | Designator | LCSC / 备注 |
+| Connector / 接口 | Data / 数据 | Supply connection / 电源连接 | Current use / 当前用途 |
 |---|---|---|---|
-| SoC | Allwinner T113-S3 (LQFP128) | T1 | dual A7 + 128 MB DDR3 |
-| SPI NAND | W25N01GVZEIG 1 Gbit | U6 | C90768 |
-| Wi-Fi/BT | RTL8723DS module | U11 | C2920724 |
-| BLE Mesh (optional) | MX-02 socket | U5 | on UART0, may be DNP |
-| Bucks ×4 | SY8088AAC | U1–U4 | C79313 |
-| Audio amp | LM4871 (SOIC-8) | U53 | C7494970 |
-| Backlight boost | MT9201 | U52 | C182966 |
-| Microphone | GMI4015P-2C-42dB | MIC2 | C233292 |
-| USB-C ×2 | KH-TYPE-C-16P | USB9/10 | C709357 |
-| LCD FPC | FPC-05F-30PH20 (30P 0.5) | FPC2 | C2856808 |
-| TP FPC | AFC07-S06ECA-00 (6P 0.5) | FPC7 | C262579 |
-| Log UART | ZX-MX1.25-3PWT | U24 | C7430469 |
-| Speaker terminal | HC-1.25-2PWT | CN2 | C2845379 |
-| Main crystal | 24 MHz ±10 ppm | X1 | C5444545 |
-| RTC crystal | 32.768 kHz | X2 | C620155 |
-| Antenna | AN2051-245 ceramic | L10 | C99727 |
-| ESD/TVS | ESD5451N ×11 | U21…U50 | C2936977 |
-| OR-ing diodes | LMBR240FT1G ×2 | D22/D23 | C383230 |
+| USB10 | USB0 OTG | VIN5V → D23 → 5V | ADB, firmware tools, companion transport / ADB、烧录工具与伴侣通信 |
+| USB9 | USB1 signals | VBUS directly on 5V bus / VBUS 直接接 5V 总线 | Main power input; other host uses require validation / 主供电，其他主机用途待验证 |
 
-The full 50-line BOM (with all passives) is in [`../bom/`](../bom/AuraBar-BOM-v1.0.xlsx).
-完整 50 项 BOM（含全部阻容感）见 [`../bom/`](../bom/AuraBar-BOM-v1.0.xlsx)。
+CC1/CC2 use separate 5.1 kΩ Rd pull-downs: R141/R142 at USB10 and R113/R114 at USB9. They indicate sink attachment; **they do not negotiate USB PD**. USB1 host-capable data signals together with sink CC wiring and an input VBUS connection do not form a validated standards-compliant host power port.
+
+CC1/CC2 分别使用 5.1 kΩ Rd 下拉：USB10 为 R141/R142，USB9 为 R113/R114。它们声明取电端连接，**不执行 USB PD 协商**。USB1 的主机数据信号与取电端 CC、输入 VBUS 连接组合在一起，并不自动构成已验证的标准主机供电端口。
+
+![Debug USB circuit / 调试 USB 电路](images/usb-debug-typec.png)
+
+*Original Word image 15. / Word 原图 15。*
+
+### 7.3 Supply isolation and losses / 供电隔离与损耗
+
+The final netlist places **D23 between VIN5V and the system 5V bus**, anode at VIN5V and cathode at 5V. USB9 VBUS connects directly to the system bus. This is asymmetric supply isolation, not two independent diode OR-ing branches. **D22 is the backlight boost rectifier.**
+
+最终网表中 **D23 位于 VIN5V 与系统 5V 总线之间**，阳极接 VIN5V、阴极接 5V；USB9 的 VBUS 直接接系统总线。因此这是不对称的供电隔离，不能描述为两条独立二极管 OR-ing 支路。**D22 是背光升压整流二极管。**
+
+Check both single-cable and dual-cable supply conditions before declaring a supported connection combination. The diode does not provide automatic current sharing, negotiated source selection or complete reverse protection at every connector. Its approximate loss is `P = I * Vf`; voltage drop can matter during bright backlight and audio peaks.
+
+应测量单线与双线连接条件，再确定支持的连接组合。该二极管不提供自动均流、协商式电源选择，也不能证明每个接口都具备完整反向保护。损耗近似为 `P = I * Vf`，高亮背光与音频峰值时需关注压降。
+
+![Power indicator / 电源指示灯](images/power-oring-diode.png)
+
+*Additional image: despite the historical filename, it shows LED3 and R115, not an OR-ing diode. / 补充图：尽管历史文件名包含 diode，实际内容是 LED3 与 R115，并非 OR-ing 二极管。*
+
+![Final CONNECT sheet / 最终 CONNECT 图页](images/schematic/04-connect.png)
+
+*Final page 4: both USB connectors, D23, indicator, keys and UART header. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=4). / 最终第 4 页：双 USB、D23、指示灯、按键与串口。*
+
+## 8. Keys and Serial Diagnostics / 按键与串口诊断
+
+LED1 is the signal name on PD11; its physical LED is LED4 with R124. BTN1 is PD10, SW5, with C124 = 100 nF and U42 protection. Signal aliases and component designators are different identifiers. Software should still handle debounce and decide the button action explicitly.
+
+LED1 是 PD11 上的信号名，实际器件为 LED4 与 R124；BTN1 使用 PD10、SW5，配 C124 = 100 nF 与 U42 保护。信号名和元件位号是两类标识。软件仍需处理消抖，并明确按键行为。
+
+![LED and key / LED 与按键](images/led-and-button.png)
+
+*Original Word image 16. / Word 原图 16。*
+
+UART3 TX/RX on **PB6/PB7, T1 pins 80/79**, is routed to U24, a ZX-MX1.25-3PWT log header with U37/U38 protection. The console's actual baud rate and routing are BSP settings. UART1 is used for the wireless module; UART0 is connected to the optional U5 socket. Use a logic-level adapter matched to the interface, verify GND/TX/RX, and do not connect RS-232 voltage levels.
+
+UART3 的 TX/RX 使用 **PB6/PB7、T1 的 80/79 脚**，接至 U24 日志口，型号为 ZX-MX1.25-3PWT，带 U37/U38 保护；实际控制台波特率与路由由 BSP 配置。UART1 用于无线模块，UART0 接至可选 U5 插座。应使用与接口电平匹配的适配器，核对 GND/TX/RX，不能接入 RS-232 电压。
+
+![UART3 header / UART3 接口](images/uart3-debug-port.png)
+
+*Original Word image 17. / Word 原图 17。*
+
+## 9. Audio Input and Output / 音频输入与输出
+
+The signal paths are microphone → bias/filter/coupling → SoC codec, and codec HPOUTR → coupling/gain network → LM4871 → speaker. These paths support different acceptance tasks: playback has working software records, whereas a microphone voice assistant additionally requires capture, processing and application integration.
+
+信号链分别为：麦克风 → 偏置/滤波/耦合 → 主控 codec，以及 codec HPOUTR → 耦合/增益网络 → LM4871 → 扬声器。两条链路对应不同验收任务：播放已有软件实机记录，麦克风语音助手还需要采集、处理与应用集成。
+
+### 9.1 Microphone bias and filtering / 麦克风偏置与滤波
+
+![Microphone reference / 麦克风参考电路](images/mic-reference-circuit.png)
+
+*Original Word image 18: reference designators such as C46/C47 and R27/R34 are historical. / Word 原图 18：C46/C47、R27/R34 等属于参考位号。*
+
+![Microphone design note / 麦克风设计说明图](images/mic-circuit.png)
+
+*Original Word image 19: later signal-chain illustration; the final component identity and values follow the AUDIO sheet. / Word 原图 19：后续信号链图示，最终器件身份与参数按 AUDIO 图页核对。*
+
+| Element / 元件 | Final source value / 最终资料值 | Circuit role / 电路作用 |
+|---|---|---|
+| MIC2 | GMI4015P-2C-42db | Electret input transducer / 驻极体麦克风 |
+| C85/C86 | 100 nF | AC coupling to MICIN3P/N / 交流耦合至差分输入 |
+| R146/R147 | 1 kΩ each / 各 1 kΩ | Bias and return network / 偏置与回路网络 |
+| C87 | 100 pF | Differential high-frequency shunt / 差模高频旁路 |
+| R148 | 75 Ω | Supply-path series filtering / 供电串联滤波 |
+| C143 | 10 µF | Filtered microphone supply decoupling / 滤波后麦克风电源去耦 |
+| T1 pins / 引脚 | 87 / 88 | MICIN3P / MICIN3N |
+
+For 100 nF, `|Xc| = 1/(2πfC) ≈ 1.59 kΩ at 1 kHz`, not 1.6 Ω. Low-frequency attenuation depends on the complete input impedance and coupling network. For an isolated unloaded 75 Ω / 10 µF RC section, `fc ≈ 212 Hz`; actual loading changes the response and introduces DC voltage drop.
+
+100 nF 电容在 1 kHz 下的容抗为 `|Xc| = 1/(2πfC) ≈ 1.59 kΩ`，不是 1.6 Ω。低频衰减取决于完整输入阻抗与耦合网络。对孤立、无负载的 75 Ω / 10 µF RC 环节，`fc ≈ 212 Hz`；实际负载会改变响应，并带来直流压降。
+
+A 100 pF capacitor has about 159 Ω reactance at 10 MHz; describing it as an ideal short above 10 MHz is too strong. Its attenuation depends on source impedance and parasitics. Likewise, changing microphone bias resistance does not guarantee increased sensitivity: verify bias current, operating voltage, headroom and recorded noise together.
+
+100 pF 电容在 10 MHz 下容抗约 159 Ω，不能简单称为该频率以上的理想短路；衰减还取决于源阻抗与寄生。改变麦克风偏置电阻也不保证提高灵敏度，应同时验证偏置电流、工作电压、动态余量与录音噪声。
+
+### 9.2 Amplifier topology and gain / 功放拓扑与增益
+
+The final BOM uses **LM4871 U53**, SOIC-8, listed under IDCHIP with supplier code C7494970. The historical LM4890S circuit is retained to show the earlier choice. A similar part number is not proof of interchangeable pin behavior or guaranteed audio performance; procurement must match the assembled device's documentation.
+
+最终 BOM 使用 **LM4871 U53**、SOIC-8，厂商栏为 IDCHIP，采购编码为 C7494970。保留 LM4890S 历史图以说明早期选择。相近型号不代表引脚行为或音频指标必然兼容，采购时需匹配实际装配器件资料。
+
+![LM4890S reference / LM4890S 参考](images/amplifier-lm4890-reference.png)
+
+*Original Word image 20: early amplifier reference, not the final U53. / Word 原图 20：早期功放参考，不是最终 U53。*
+
+![Early amplifier circuit / 早期功放电路](images/amplifier-output.png)
+
+*Original Word image 21: still shows LM4890S and R144 = 68 kΩ. The filename does not make it the final circuit. Final design: LM4871 with R149 = 20 kΩ. / Word 原图 21：仍标注 LM4890S 与 R144 = 68 kΩ，文件名不代表最终版本；最终为 LM4871 与 R149 = 20 kΩ。*
+
+The final netlist routes CN2 between VO+ and VO−: **both speaker wires are driven outputs**. Neither is a ground return. With the usual LM4871 bridge topology, 20 kΩ input and feedback resistors give an estimated differential gain magnitude of `2*Rf/Ri = 2` (about 6 dB). C142 = 470 nF with R136 = 20 kΩ gives an approximate input high-pass corner of 17 Hz, assuming negligible source impedance. These are topology estimates, not measured response.
+
+最终网表将 CN2 接在 VO+ 与 VO− 之间，**扬声器两根线都是驱动输出**，均不是接地回路。按常见 LM4871 桥接拓扑，输入和反馈电阻均为 20 kΩ 时，差分增益幅值估算为 `2*Rf/Ri = 2`，约 6 dB；C142 = 470 nF 与 R136 = 20 kΩ 的输入高通拐点约为 17 Hz，假设源阻抗可忽略。这些是拓扑估算，不是实测响应。
+
+The [TI LM4871 reference datasheet](https://www.ti.com/lit/ds/symlink/lm4871.pdf) explains the bridged output, external gain network and high-active shutdown. It is a topology reference; the BOM's listed supplier is different. Confirm the actual part before relying on pin thresholds or ratings.
+
+[TI LM4871 参考手册](https://www.ti.com/lit/ds/symlink/lm4871.pdf)说明了桥接输出、外部增益网络与高电平关断；这里用于拓扑参考，BOM 所列供应厂商不同，具体阈值和额定参数仍须按实际器件核对。
+
+C138 = 1 µF filters the bypass node; C139 = 10 µF decouples the amplifier supply. R138 = 100 kΩ pulls PA_SHDN low, and the netlist connects PA_SHDN to T1 PB2. For a high-active shutdown device, this pull-down defaults toward enabled operation, so it must not be described as guaranteed boot muting. Check power sequencing and software control for clicks/pops.
+
+C138 = 1 µF 用于旁路节点滤波，C139 = 10 µF 用于功放供电去耦。R138 = 100 kΩ 将 PA_SHDN 下拉，网表中 PA_SHDN 接至 T1 PB2。若所用器件为高电平关断，下拉默认趋向使能，因此不能描述为保证启动静音；需要结合上电时序与软件控制检查爆音。
+
+R135 = 22 Ω and C135 = 100 nF form a series RC branch from HPOUTR to ground. This is a frequency-dependent load/shunt branch, not by itself a conventional series-signal low-pass with a defined 22 Ω / 100 nF cutoff. Its effect depends on codec output impedance. C91 = 100 nF terminates HPOUT_FB according to the source design; confirm the codec's intended mode when changing this chain.
+
+R135 = 22 Ω 与 C135 = 100 nF 串联后从 HPOUTR 接地，属于随频率变化的负载/旁路支路，本身不是可直接按 22 Ω / 100 nF 定义截止频率的常规串联信号低通；实际作用与 codec 输出阻抗有关。C91 = 100 nF 按原设计连接 HPOUT_FB，修改链路时需核对 codec 工作模式。
+
+![Final AUDIO sheet / 最终 AUDIO 图页](images/schematic/05-audio.png)
+
+*Final page 5. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=5). / 最终第 5 页。*
+
+Use an 8 Ω speaker consistent with the intended design. Output power, frequency response and perceived loudness depend on supply, distortion limit, speaker and enclosure. Playback confirmation does not establish those specifications. Microphone capture, echo cancellation and wake-word performance require separate tests.
+
+使用与设计匹配的 8 Ω 扬声器。输出功率、频响与实际响度取决于供电、失真限值、扬声器和腔体；播放成功不能证明这些指标。麦克风采集、回声消除与唤醒词性能需要另行测试。
+
+## 10. Wireless Connectivity / 无线连接
+
+RTL8723DS U11 provides a Wi-Fi SDIO path and a Bluetooth UART path. The module is not a standalone ready-to-use networking service: BSP support, module firmware, antenna integration and application software determine the usable features. Current computer-companion acceptance uses USB10.
+
+RTL8723DS U11 提供 Wi-Fi SDIO 与蓝牙 UART 路径。模块本身不是可直接交付的完整网络服务，实际功能取决于 BSP、模块固件、天线集成与应用软件；当前电脑伴侣的验收链路使用 USB10。
+
+![Wireless module circuit / 无线模块电路](images/wifi-module-rtl8723ds.png)
+
+*Original Word image 22. / Word 原图 22。*
+
+![Wireless controller connections / 无线与主控连接](images/wifi-mcu-connections.png)
+
+*Original Word image 23. / Word 原图 23。*
+
+| Function / 功能 | Controller / 主控 | Design consideration / 设计关注点 |
+|---|---|---|
+| SDIO clock / 时钟 | PG0 / SDC1_CLK | R90 = 33 Ω series termination; verify edges / 串联阻尼并验证边沿 |
+| SDIO command / 命令 | PG1 / SDC1_CMD | Pull state and driver setup / 上拉状态与驱动配置 |
+| SDIO data / 数据 | PG2–PG5 / D0–D3 | Pin mux, signal integrity and bus initialization / 复用、信号完整性与初始化 |
+| Bluetooth UART / 蓝牙串口 | PG6–PG9 / UART1 | TX/RX plus RTS/CTS; verify endpoint directions / 含流控，按端点核对方向 |
+| Antenna / 天线 | AN2051-245, L10 | Clearance, matching and enclosure effects / 净空、匹配与外壳影响 |
+
+The original module circuit pulls enable and several unused control inputs to defined states and leaves PCM and selected wake/clock paths unused. These choices limit what sleep/wake or Bluetooth-audio behavior can be assumed. Software must be configured to the actual wiring; do not promise host wake or PCM routing merely because the silicon supports it.
+
+原模块电路将使能及部分未用控制输入固定到确定状态，未使用 PCM 与部分唤醒/时钟路径。这限制了能够直接假设的休眠、唤醒与蓝牙音频行为。软件须匹配实际接线，不能只因芯片支持就宣称板卡具有主机唤醒或 PCM 路由。
+
+### Optional U5 socket / 可选 U5 插座
+
+U5 is an MX-02 socket on UART0. The final NET sheet labels its mode input as normal versus low-power/transmit-only behavior. This is a module-specific annotation, not a universal BLE Mesh mode definition. Check the installed module and its firmware before using those controls. A BOM entry does not prove the module is populated or Mesh software is implemented.
+
+U5 是 UART0 上的 MX-02 插座。最终 NET 图页将其模式输入注释为正常与低功耗/仅发送行为；这是特定模块说明，不是通用 BLE Mesh 模式定义。使用前应核对实际模块及固件；BOM 条目不能证明模块已装配或 Mesh 软件已实现。
+
+![Final NET sheet / 最终 NET 图页](images/schematic/02-net.png)
+
+*Final page 2: RTL8723DS and optional socket. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=2). / 最终第 2 页：无线模块与可选插座。*
+
+## 11. Display Touch and Backlight / 显示触摸与背光
+
+### 11.1 Display connector / 显示连接器
+
+The current panel is a 6.9-inch bar display. FPC2 is a 30-contact, 0.5 mm connector carrying four MIPI data pairs, a differential clock, TE, reset, 3.3 V and the backlight connections. C132 = 22 µF and C133 = 1 µF provide local supply capacitance. A connector with the same pitch and contact count is not automatically pin-compatible.
+
+当前面板为 6.9 英寸长条屏。FPC2 为 30 触点、0.5 mm 连接器，承载四组 MIPI 数据差分对、差分时钟、TE、复位、3.3 V 与背光连接；C132 = 22 µF、C133 = 1 µF 提供本地电容。间距和触点数相同不代表连接器或屏幕线序兼容。
+
+![Display connector / 显示连接器](images/mipi-lcd-fpc30.png)
+
+*Original Word image 24. Unused and grounded contacts must be read individually; do not assume every early contact is ground. / Word 原图 24；未用与接地触点应逐一查看，不能笼统认为前几个触点都接地。*
+
+### 11.2 Framebuffer and visible coordinates / 帧缓冲与可见坐标
+
+The original panel description uses 280 × 1424, while current board records show driver `fl7707n_mipi`, framebuffer 720 × 1424, 32 bpp, 2880-byte stride and virtual height 2848. The application-visible landscape area is 1424 × 280. Driver timing, framebuffer allocation, orientation and the visible UI region are different layers; changing a 720 entry to 280 is not a valid general repair.
+
+原屏幕说明使用 280 × 1424，而当前板卡记录为 `fl7707n_mipi` 驱动、720 × 1424 帧缓冲、32 bpp、2880 字节行跨度、虚拟高度 2848；应用可见横向区域为 1424 × 280。驱动时序、缓冲分配、方向与可见界面是不同层次，不能把某处 720 直接改成 280 当作通用修复。
+
+Check a known color pattern first, then buffer stride and pixel format, then rotation/cropping and LVGL flush boundaries. Separately test touch alignment and backlight. A framebuffer capture validates stored pixels, while the physical panel validates the complete output chain.
+
+先验证固定色块，再检查行跨度、像素格式、旋转/裁剪与 LVGL 刷新边界；触摸与背光单独验证。帧缓冲截图证明内存像素内容，实物屏幕才能验证完整输出链路。
+
+### 11.3 Touch connector and coordinate mapping / 触摸线序与坐标映射
+
+FPC7 is a 6-contact touch connector with additional ground/mounting pads. The **final netlist**, rather than the old prose, gives this contact mapping:
+
+FPC7 为六触点触摸连接器，另有接地/固定焊盘。以下线序依据**最终网表**，修正旧文字的顺序：
+
+| FPC7 contact / 触点 | Net / 网络 | T113-S3 connection / 主控连接 |
+|---|---|---|
+| 1 | GND | Ground / 地 |
+| 2 | TP_INT | PE5, pin 42 / 42 脚 |
+| 3 | TP_SDA | PE1, pin 45 / 45 脚 |
+| 4 | TP_SCL | PE0, pin 44 / 44 脚 |
+| 5 | TP_RST | PE4, pin 43 / 43 脚 |
+| 6 | 3V3 | Supply / 电源 |
+| 7 / 8 | GND | Additional pads / 附加焊盘 |
+
+![Touch design reference / 触摸设计参考](images/touch-i2c-fpc6.png)
+
+*Additional circuit image; confirm final connector numbering and contact orientation before wiring. / 补充电路图，接线前确认最终脚号与触点朝向。*
+
+RN1 is a 10 kΩ resistor array. I²C pull-up selection depends on bus capacitance, speed and voltage; INT/RST behavior is controller-specific and should not be generalized as identical to I²C open-drain signaling. Check reset/address selection, interrupt configuration and edge/corner coordinate mapping in the running BSP.
+
+RN1 为 10 kΩ 排阻。I²C 上拉选择取决于总线电容、速率与电压；INT/RST 的行为由触摸控制器决定，不能笼统等同于 I²C 开漏信号。应核查运行 BSP 的复位/地址选择、中断配置以及四角与边缘坐标映射。
+
+### 11.4 Backlight regulation / 背光调节
+
+The backlight driver is **MT9201 U52**. The original notes describe two strings of four LEDs, a nominal 12 V forward requirement and a reduced-current target around 20 mA. These are source design assumptions, not a measured lifetime or brightness specification. Confirm the actual panel string topology and whether a quoted current is per string or total.
+
+背光驱动为 **MT9201 U52**。原说明描述两串、每串四颗 LED，标称正向需求约 12 V，并以约 20 mA 作为较低电流设计目标。这些属于原始设计假设，不是实测寿命或亮度指标。需核对实际屏幕串并联结构，以及所述电流是单串还是总电流。
+
+![MT9201 application reference / MT9201 应用参考](images/backlight-mt9201-reference.png)
+
+*Original Word image 25: reference boost topology. / Word 原图 25：升压拓扑参考。*
+
+![Backlight design circuit / 背光设计电路](images/backlight-mt9201.png)
+
+*Original Word image 26. / Word 原图 26。*
+
+| Element / 元件 | Value / 参数 | Purpose / 用途 |
+|---|---|---|
+| L18 | 10 µH, WPN201610H100MT | Boost inductor / 升压电感 |
+| D22 | LMBR240FT1G | Boost rectifier to LEDA / 至 LEDA 的升压整流 |
+| R121 | 10 Ω | Feedback current sensing / 反馈电流采样 |
+| R120 | 10 kΩ | EN pull-down / EN 下拉 |
+| C141 / C119 | 1 µF each; BOM lists 50 V X5R parts / BOM 为 50 V X5R | Input/output capacitance / 输入输出电容 |
+| FPC2 30 / 28–29 | LEDA / LEDK | Backlight anode/cathode / 背光阳极与阴极 |
+
+For a current-sense driver, `I ≈ VFB/Rsense`; the 10 Ω resistor alone does not prove the LED current without the driver's feedback reference. Check inductor peak current, diode voltage/current margin and output-capacitor effective capacitance under bias. The source recommends low-ESR/X7R selection, whereas the actual BOM lists X5R; evaluate the installed part rather than silently replacing that distinction in the documentation.
+
+对电流采样驱动，`I ≈ VFB/Rsense`；缺少驱动反馈基准时，不能只凭 10 Ω 就确认 LED 电流。应检查电感峰值电流、二极管电压/电流裕量，以及输出电容带偏压后的有效容量。原说明建议低 ESR/X7R，而实际 BOM 为 X5R，应按实际器件评估并保留这个差异。
+
+R120 pulls EN low before active drive, reducing unintended startup lighting. This expresses a hardware default; test the real power sequence and PWM behavior. Open-load boost voltage and protection behavior must be checked before powering without a panel; component voltage ratings must cover the actual worst case.
+
+R120 在主动驱动前将 EN 下拉，降低上电误亮的可能；这只是硬件默认状态，仍需测试实际时序与 PWM。无负载升压及保护行为应在无屏上电前核对，器件耐压必须覆盖真实最坏情况。
+
+![Final DISPLAY sheet / 最终 DISPLAY 图页](images/schematic/07-display.png)
+
+*Final page 7: MIPI connector, I²C touch and backlight. [Vector PDF](../schematic/AuraBar-Schematic-v1.0.pdf#page=7). / 最终第 7 页：显示端子、触摸与背光。*
+
+## 12. PCB and Bring-up Review / PCB 与调试审查
+
+The supplied STEP gives an approximately 75 × 38 mm board body. It is useful for geometry inspection, but it does not establish enclosure clearance, panel fixation or connector accessibility. New product renders can explore new enclosures; mechanical release needs an actual assembly baseline.
+
+提供的 STEP 对应约 75 × 38 mm 板体，可用于几何检查，但不能证明外壳间隙、屏幕固定或连接器插拔空间。产品渲染可探索新外壳，正式结构发布仍需实际装配基线。
+
+| Review area / 审查项 | Engineering work / 工程工作 | Evidence to retain / 应保留依据 |
+|---|---|---|
+| Supply loops / 电源回路 | Trace switching current and feedback return / 核查开关电流与反馈回流 | Layout, startup/ripple/thermal captures / 布局、启动、纹波与温升记录 |
+| MIPI and USB / 高速接口 | Inspect pairs, reference planes and connector transitions / 检查差分对、参考面与过渡 | Stack-up, routing review, sustained link tests / 层叠、布线审查与持续链路测试 |
+| Clock/reset / 时钟复位 | Check placement and power sequencing / 检查布局与上电时序 | Waveforms and repeated-start results / 波形与重复启动结果 |
+| Audio / 音频 | Check bias, gain, clipping and switching noise / 检查偏置、增益、削顶与开关噪声 | Capture/playback measurements and listening records / 采放测量与听音记录 |
+| Antenna / 天线 | Inspect clearance and enclosure interaction / 检查净空与结构影响 | Installed wireless tests / 整机无线测试 |
+| FPC/mechanics / 排线结构 | Check contact orientation, bend and strain / 检查触点朝向、弯折与应力 | Assembly drawings and physical fit / 装配图与试装 |
+
+Recommended sequence: unpowered inspection → controlled 5 V power and rail measurement → reset/clock and boot logs → Flash recovery → fixed display pattern → touch boundaries → test audio → USB events → sustained use in the target enclosure. Record the exact board, image and application revision. Existing functional records are linked from [validation](../../docs/testing/README.md); they do not replace electrical qualification.
+
+建议顺序为：断电检查 → 受控 5 V 供电及电源测量 → 复位/时钟与启动日志 → Flash 恢复 → 固定显示图案 → 触摸边界 → 测试音频 → USB 事件 → 目标外壳中的持续运行。记录准确的板卡、系统与应用版本。已有功能记录见[验证说明](../../docs/testing/README.md)，不替代电气验收。
+
+One netlist item merits a separate electrical review: T1 HPOUTL pin 99 is on GND in the exported source. Confirm the intended codec output mode, actual assembly and device requirements before enabling that channel. Working right-channel playback does not resolve this unused-channel connection question.
+
+网表中有一项需要独立电气审查：导出资料将 T1 的 HPOUTL、99 脚接至 GND。启用该声道前，应核查 codec 输出模式、实际装配与器件要求；右声道播放正常不能证明未用声道的接法已经验证。
+
+## 13. Source Corrections / 来源差异与修正
+
+This register makes interpretation changes explicit. Source files and embedded images remain preserved; documentation corrections do not modify the physical board or silently change the original BOM.
+
+本表明确记录解释上的修正。原始文件和图片保持保留，文档修正不改变实物板卡，也不擅自修改原 BOM。
+
+| Earlier note / 早期说法 | Reconciled interpretation / 核对后的解释 |
+|---|---|
+| 3.3 V divider R2 = 68 kΩ | BOM/netlist: R2 = 680 kΩ upper, R1 = 150 kΩ lower; nominal 3.32 V / 按实际连接计算 |
+| Multiple divider roles reversed / 多路分压角色颠倒 | Follow section 4 table derived from FB connections / 按第 4 节 FB 连接表 |
+| Main clock C30/C31 | Final C122/C123; C30 is a decoupling capacitor / 最终位号不同 |
+| 10 MΩ resistor trims RTC frequency / 10 MΩ 微调频率 | Feedback/bias path; loading determines frequency / 反馈偏置，频率与负载有关 |
+| FEL key called SW2 | Final SW1 = Flash/FEL, SW2 = reset / 按最终按键位号 |
+| /WP always forces read-only / WP 一定使只读 | Protection depends on register/mode configuration / 与寄存器及模式有关 |
+| Rd implies PD / 下拉代表 PD | Rd indicates sink attachment; no PD controller demonstrated / 仅表示取电端连接 |
+| D22/D23 are both USB isolation diodes / 都是 USB 隔离 | D23 is VIN5V → 5V; D22 is backlight boost / 分属两条电路 |
+| Image named power-oring-diode / 文件名含隔离二极管 | Image content is LED3/R115 indicator / 内容实际为指示灯 |
+| Microphone C46/C47, R27/R34 | Reference identifiers; final C85/C86 and R146/R147 / 最终位号不同 |
+| 100 nF at 1 kHz ≈ 1.6 Ω | Correct magnitude ≈ 1.59 kΩ / 正确数量级为千欧 |
+| 100 pF is a short at 10 MHz / 理想短路 | Reactance ≈ 159 Ω; attenuation depends on circuit / 衰减取决于电路 |
+| Final amplifier screenshot is LM4871 / 功放截图为最终版 | Word figure still shows LM4890S; final PDF uses U53 LM4871 / 截图与最终图页不同 |
+| R144 = 68 kΩ feedback | Final R149 = 20 kΩ; gain must use final topology / 增益按最终网络计算 |
+| Series RC shunt is a conventional low-pass / RC 旁路为常规低通 | Frequency-dependent load; codec source impedance matters / 是与源阻抗有关的负载支路 |
+| Touch pin 1 = INT, PB group / 触摸首脚与端口 | Final pin 1 = GND, pin 2 = INT; controller PE group / 以网表为准 |
+| UART3 = PB8/PB9 | Final UART3 TX/RX = PB6/PB7, T1 pins 80/79 / 最终管脚按网表修正 |
+| SPI0 uses PF; MIPI uses PD13–19 / 接口端口误记 | Final SPI0 uses PC2–PC7; MIPI pairs use PD0–PD9 / 最终端口不同 |
+| All first seven LCD contacts are ground / LCD 前七脚均接地 | Inspect individual contacts; several are unused / 逐脚核对，部分未用 |
+| All backlight capacitors are X7R / 均为 X7R | Final C119/C141 BOM lists 50 V X5R / 最终 BOM 为 X5R |
+| 50 populated BOM lines / BOM 50 项 | CSV contains 49 non-empty component rows and a blank trailing row / 49 条非空物料行 |
+| 0 Ω gives analog isolation / 0 Ω 模拟隔离 | Conductive connection, not galvanic isolation / 导通连接而非电气隔离 |
+
+## 14. Components and Source Documents / 器件与设计资料
+
+| Function / 功能 | Final part / 最终器件 | Designator / 位号 | Supplier code / 采购编码 |
+|---|---|---|---|
+| SoC / 主控 | T113-S3 | T1 | See BOM / 见 BOM |
+| Regulators / 稳压器 | SY8088AAC ×4 | U1–U4 | C79313 |
+| Flash / 闪存 | W25N01GVZEIG | U6 | C907680 |
+| Wireless / 无线 | RTL8723DS module | U11 | C2920724 |
+| Optional socket / 可选插座 | MX02 | U5 | See BOM / 见 BOM |
+| Amplifier / 功放 | LM4871 | U53 | C7494970 |
+| Microphone / 麦克风 | GMI4015P-2C-42db | MIC2 | C233292 |
+| Backlight / 背光 | MT9201 | U52 | C182966 |
+| USB-C | KH-TYPE-C-16P ×2 | USB9/USB10 | C709357 |
+| LCD connector / 屏幕端子 | FPC-05F-30PH20 | FPC2 | C2856808 |
+| Touch connector / 触摸端子 | AFC07-S06ECA-00 | FPC7 | C262579 |
+| UART header / 串口端子 | ZX-MX1.25-3PWT | U24 | C7430469 |
+| Speaker connector / 扬声器端子 | HC-1.25-2PWT | CN2 | C2845379 |
+| Main crystal / 主晶体 | XL2EL89COI-111YLC-24M | X1 | C5444545 |
+| RTC crystal / RTC 晶体 | X321532768KGD2SI | X2 | C620155 |
+| Antenna / 天线 | AN2051-245 | L10 | C99727 |
+| Schottky diodes / 肖特基 | LMBR240FT1G | D22/D23 | C383230 |
+| ESD protection / 静电保护 | ESD5451N ×11 | See BOM / 见 BOM | C2936977 |
+
+- [Editable LCEDA project / 可编辑工程](../lceda/6.22_Screen.eprj2)
+- [Final schematic PDF / 最终原理图](../schematic/AuraBar-Schematic-v1.0.pdf)
+- [BOM spreadsheet / BOM 表格](../bom/AuraBar-BOM-v1.0.xlsx) and [CSV](../bom/AuraBar-BOM-v1.0.csv)
+- [Netlist / 网表](../schematic/netlist.net) and [DXF sheets / DXF 图页](../schematic/dxf/)
+- [Original Word source / 原始 Word](hardware-design-guide-source.docx)
+- [Figure index / 图像索引](figure-index.md) and [machine-readable provenance / 来源清单](figure-provenance.json)
+- [Interface map / 接口表](../../docs/hardware/interfaces.md) and [mechanical references / 机械参考](../mechanical/README.md)
+- [Hardware license / 硬件许可](../LICENSE) and [third-party notices / 第三方说明](../../THIRD_PARTY_NOTICES.md)
+
+The supplied controller reference is [T113-S3 datasheet v1.6](https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf), hosted by the community. Obtain current manufacturer documentation and procurement-specific datasheets for design sign-off. No EMI, thermal, lifetime, automotive or production qualification is inferred from the presence of a circuit or reference image.
+
+原说明提供的主控参考为社区托管的 [T113-S3 v1.6 数据手册](https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf)。设计签核需补齐原厂资料与具体采购器件手册。不能因电路或参考图存在，就推定已完成 EMI、温升、寿命、车规或量产验收。
