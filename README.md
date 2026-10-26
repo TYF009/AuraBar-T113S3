@@ -61,7 +61,7 @@ Prepared binaries are **application upgrades for a matching Tina system**. A com
 | Connectivity | RTL8723DS hardware; USB10 is the verified companion transport |
 | Engineering | LCEDA Pro project, seven schematic sheets, BOM and netlist |
 
-Hardware connectivity and enabled software are tracked separately. Bluetooth audio, BLE Mesh control and physical Wi-Fi transport acceptance remain open. Read the [hardware design guide: product advantages, engineering decisions and subsystem walkthrough (中文)](docs/hardware/README.md).
+Hardware connectivity and enabled software are tracked separately. Bluetooth audio, BLE Mesh control and physical Wi-Fi transport acceptance remain open. Read the [bilingual hardware design guide: product advantages, engineering decisions and illustrated circuits](docs/hardware/README.md).
 
 ## Find your entry point
 

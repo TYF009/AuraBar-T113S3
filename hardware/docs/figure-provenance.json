@@ -1,0 +1,246 @@
+{
+  "source": "hardware/docs/hardware-design-guide-source.docx",
+  "source_sha256": "84704ced6c9e245145f8635d979412f93a696683a48852b9a8953383bc40d3e3",
+  "media_count": 26,
+  "image_occurrences": 27,
+  "figures": [
+    {
+      "order": 1,
+      "paragraph": 5,
+      "docx_media": "word/media/image1.png",
+      "sha256": "62799fa843b1853c88e8eb262bdb25364b16230c3314ffe1ced6cf84b06b8af4",
+      "repository_image": "hardware/docs/images/t113-s3-features.png"
+    },
+    {
+      "order": 2,
+      "paragraph": 7,
+      "docx_media": "word/media/image2.png",
+      "sha256": "bdadd41c85f8cc633bd78e165c0a6b41f6a68b03a8db42b6282764eabeca89d6",
+      "repository_image": "hardware/docs/images/t113-s3-block-diagram.png"
+    },
+    {
+      "order": 3,
+      "paragraph": 12,
+      "docx_media": "word/media/image3.png",
+      "sha256": "21fb891708a23ff65d17adc97d97df721b320c01d92efe1299849102fe85c72a",
+      "repository_image": "hardware/docs/images/mcu-symbol-drawing.png"
+    },
+    {
+      "order": 4,
+      "paragraph": 28,
+      "docx_media": "word/media/image4.png",
+      "sha256": "8a717bfa47ee2471e9a6124066d75d0849dffcb1d204a858a0fa3e3de7a03615",
+      "repository_image": "hardware/docs/images/clock-main-24m.png"
+    },
+    {
+      "order": 5,
+      "paragraph": 41,
+      "docx_media": "word/media/image5.png",
+      "sha256": "4423d62aa3d956ca8dfdf203f86693c520efe7d2b0d5c29815c9b741e9616916",
+      "repository_image": "hardware/docs/images/clock-rtc-32k-schematic.png"
+    },
+    {
+      "order": 6,
+      "paragraph": 43,
+      "docx_media": "word/media/image4.png",
+      "sha256": "8a717bfa47ee2471e9a6124066d75d0849dffcb1d204a858a0fa3e3de7a03615",
+      "repository_image": "hardware/docs/images/clock-main-24m.png"
+    },
+    {
+      "order": 7,
+      "paragraph": 48,
+      "docx_media": "word/media/image6.png",
+      "sha256": "4a0fd6c3a9aae25e9184daf33a9c3191072dcd5fe8d7c60a795c4f86433f7278",
+      "repository_image": "hardware/docs/images/reset-circuit.png"
+    },
+    {
+      "order": 8,
+      "paragraph": 59,
+      "docx_media": "word/media/image7.png",
+      "sha256": "c9db43a3922a80c57259d68b4980fc879f31926fea43cb48ecd5992fe1de9cb2",
+      "repository_image": "hardware/docs/images/power-tree-evb-reference.png"
+    },
+    {
+      "order": 9,
+      "paragraph": 72,
+      "docx_media": "word/media/image8.png",
+      "sha256": "29be96f791e7d860a90a0f52fd793eab9da36670a178e7f72e636575cbb326fe",
+      "repository_image": "hardware/docs/images/power-pmic-option.png"
+    },
+    {
+      "order": 10,
+      "paragraph": 83,
+      "docx_media": "word/media/image9.png",
+      "sha256": "c8041ed5d22cf9c6516211073e1334d376662444d9880dc5966b329ebf470bb0",
+      "repository_image": "hardware/docs/images/power-dcdc-discrete.png"
+    },
+    {
+      "order": 11,
+      "paragraph": 88,
+      "docx_media": "word/media/image10.jpeg",
+      "sha256": "92b059927f96c7b6f891ce33fae12bcb8b1fa39ac003f6d189f6f12032db8357",
+      "repository_image": "hardware/docs/images/power-rails-original.jpeg"
+    },
+    {
+      "order": 12,
+      "paragraph": 92,
+      "docx_media": "word/media/image11.png",
+      "sha256": "a49b2c3c73543fc75946ea94fdcdd2ab361ab2ca16d5727ba76ab220e24d4416",
+      "repository_image": "hardware/docs/images/power-decoupling.png"
+    },
+    {
+      "order": 13,
+      "paragraph": 105,
+      "docx_media": "word/media/image12.png",
+      "sha256": "bc0bc5aaf7b7fdfc6632f7177ffddbaf79b5bffbb05918eb99ee26b3761c3bc7",
+      "repository_image": "hardware/docs/images/mcu-final-schematic.png"
+    },
+    {
+      "order": 14,
+      "paragraph": 111,
+      "docx_media": "word/media/image13.png",
+      "sha256": "b1f667ab438a1727dbf19114109fe0e63fbc615d4527cfc115a075fa0986ebeb",
+      "repository_image": "hardware/docs/images/dram-config.png"
+    },
+    {
+      "order": 15,
+      "paragraph": 132,
+      "docx_media": "word/media/image14.png",
+      "sha256": "ef73d651e9db0519937a6fa1069b54ab254b9f1f6f31cb6b4fb0d506352c0ad1",
+      "repository_image": "hardware/docs/images/spi-nand-flash.png"
+    },
+    {
+      "order": 16,
+      "paragraph": 141,
+      "docx_media": "word/media/image15.png",
+      "sha256": "a220633556aaf15f83e93468bdd64c5bca7633b69ac5e9838bfeea36932975ea",
+      "repository_image": "hardware/docs/images/usb-debug-typec.png"
+    },
+    {
+      "order": 17,
+      "paragraph": 158,
+      "docx_media": "word/media/image16.png",
+      "sha256": "d5c66affe8d34bc0ddedb66c505f0974dbf41b99f6f794f2923f67121a105852",
+      "repository_image": "hardware/docs/images/led-and-button.png"
+    },
+    {
+      "order": 18,
+      "paragraph": 164,
+      "docx_media": "word/media/image17.png",
+      "sha256": "015a64a17f55a3aa2d7fa07e971069aeb6475c600863d1f46578f10573466e2b",
+      "repository_image": "hardware/docs/images/uart3-debug-port.png"
+    },
+    {
+      "order": 19,
+      "paragraph": 171,
+      "docx_media": "word/media/image18.png",
+      "sha256": "b4634e4f69e8a3eed55981fd05dd9fb664c376732400094046b3b22b84167fb1",
+      "repository_image": "hardware/docs/images/mic-reference-circuit.png"
+    },
+    {
+      "order": 20,
+      "paragraph": 195,
+      "docx_media": "word/media/image19.png",
+      "sha256": "74eb14ce1370c5ff19536945f44ee7d9e384ec0fb925c6298d67b955debb1118",
+      "repository_image": "hardware/docs/images/mic-circuit.png"
+    },
+    {
+      "order": 21,
+      "paragraph": 208,
+      "docx_media": "word/media/image20.png",
+      "sha256": "aa248f0d218de2a6ee84b3f4ba2f631d898b82d2ae265144ecd0ae48c1ab415e",
+      "repository_image": "hardware/docs/images/amplifier-lm4890-reference.png"
+    },
+    {
+      "order": 22,
+      "paragraph": 210,
+      "docx_media": "word/media/image21.png",
+      "sha256": "45d4e2a4b0cf79c51866d3e8cae4511a5ea9ae42168ac613bc5ff2df86c8666b",
+      "repository_image": "hardware/docs/images/amplifier-output.png"
+    },
+    {
+      "order": 23,
+      "paragraph": 246,
+      "docx_media": "word/media/image22.png",
+      "sha256": "179e7cc85f44807aef63ca1f46c3072f7bf1f4976c97b21845c6faa8df4b2fda",
+      "repository_image": "hardware/docs/images/wifi-module-rtl8723ds.png"
+    },
+    {
+      "order": 24,
+      "paragraph": 260,
+      "docx_media": "word/media/image23.png",
+      "sha256": "5b856f413b36e7b52481931f7c734a0487918124b604b92707a0cca842c1b97c",
+      "repository_image": "hardware/docs/images/wifi-mcu-connections.png"
+    },
+    {
+      "order": 25,
+      "paragraph": 265,
+      "docx_media": "word/media/image24.png",
+      "sha256": "48b98857427befc333d485a8e633889a157c9eb55a579730a5106d52665755b7",
+      "repository_image": "hardware/docs/images/mipi-lcd-fpc30.png"
+    },
+    {
+      "order": 26,
+      "paragraph": 274,
+      "docx_media": "word/media/image25.png",
+      "sha256": "26e18df6ca64285546816d3808fc95a0048de85c49e0b56f0f460203133f5bbe",
+      "repository_image": "hardware/docs/images/backlight-mt9201-reference.png"
+    },
+    {
+      "order": 27,
+      "paragraph": 282,
+      "docx_media": "word/media/image26.png",
+      "sha256": "4467c9beee48d6ec958b4ab612f53b9de38d2c0144bfea800f51f4fabc5259c7",
+      "repository_image": "hardware/docs/images/backlight-mt9201.png"
+    }
+  ],
+  "schematic_pdf": {
+    "path": "hardware/schematic/AuraBar-Schematic-v1.0.pdf",
+    "sha256": "cf93c43ce8214f2f10d6739e5c0b6f85bc2ff9ba64dea95729b0bea7df8b380f",
+    "renders": [
+      {
+        "page": 1,
+        "sheet": "T113S3",
+        "image": "hardware/docs/images/schematic/01-t113s3.png",
+        "sha256": "55f5fb36a97dcf822fd9f68c5c171e793930827a968ca6d8f2ef089f2a4b3b95"
+      },
+      {
+        "page": 2,
+        "sheet": "NET",
+        "image": "hardware/docs/images/schematic/02-net.png",
+        "sha256": "ff096553efed01655a493e09649362b3ea7dff5288415ba9675088e049024419"
+      },
+      {
+        "page": 3,
+        "sheet": "POWER",
+        "image": "hardware/docs/images/schematic/03-power.png",
+        "sha256": "0048a74f33f1b22962ab01ae5042236ce8cf78bbb9a1be4f848e62b84482446a"
+      },
+      {
+        "page": 4,
+        "sheet": "CONNECT",
+        "image": "hardware/docs/images/schematic/04-connect.png",
+        "sha256": "c646cc2d2a1392e76e5a91df3dbd07abc35b68a21a81eb195b0a65b8533a2ad5"
+      },
+      {
+        "page": 5,
+        "sheet": "AUDIO",
+        "image": "hardware/docs/images/schematic/05-audio.png",
+        "sha256": "d338c48fea6c4b494ef5be204d9364bf2d985fb1bf649af7fc17e4425c5bb1d6"
+      },
+      {
+        "page": 6,
+        "sheet": "FLASH",
+        "image": "hardware/docs/images/schematic/06-flash.png",
+        "sha256": "28879ebd093e841ab1480ddb6ea7b12694cf279468e83dc44f8bc78a57692c36"
+      },
+      {
+        "page": 7,
+        "sheet": "DISPLAY",
+        "image": "hardware/docs/images/schematic/07-display.png",
+        "sha256": "88ca95d8ddb9f1229094d6a6626e8de14e6c45e4586e62653aa64a7352807003"
+      }
+    ]
+  },
+  "unique_image_count": 26
+}
