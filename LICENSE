@@ -11,13 +11,14 @@ This repository is released under multiple licenses, chosen per component:
    https://ohwr.org/cern_ohl_s_v2.txt
    https://cern-ohl.web.cern.ch/
 
-2. DOCUMENTATION (docs/, README files, Markdown guides)
+2. DOCUMENTATION (docs/, README files, Markdown guides; original
+   hardware/docs materials retain the hardware/LICENSE notice)
    Documentation is licensed under the Creative Commons Attribution-
    ShareAlike 4.0 International License (CC BY-SA 4.0).
    https://creativecommons.org/licenses/by-sa/4.0/
 
 3. SOFTWARE (software/)
-   Software and firmware source code (to be added) are licensed under
+   Software and firmware source code are licensed under
    the MIT License. See software/LICENSE.
    https://opensource.org/license/mit/
 

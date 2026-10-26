@@ -20,7 +20,7 @@ Schematic pages: T113S3 · NET · POWER · CONNECT · AUDIO · FLASH · DISPLAY
 
 The T113-S3 was chosen for two reasons:
 
-1. **Easy to hand-solder** — it comes in an LQFP128 package, which is the primary consideration for a tutorial / reproducible design: cloning the board is easier and cheaper.
+1. **Accessible assembly and rework** — the LQFP128 package supports practical soldering, inspection and rework during prototype development, reducing the effort needed to validate the board.
 2. **Strong configuration** — dual Cortex-A7 cores, one HiFi4 DSP, 128 MB DDR3 integrated in-package, 3 ADCs, 2 DACs, 2 I2S/PCM interfaces, MIPI DSI display output, and an integrated audio codec.
 
 Datasheet: https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf
@@ -33,7 +33,7 @@ Datasheet: https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf
 
 选择 T113-S3 主要有两方面考虑：
 
-1. **好焊接** —— 封装为 LQFP128，这是做教程时的首要考虑，学习复刻更容易、成本更低；
+1. **便于装配与返修** —— LQFP128 封装便于原型阶段焊接、检查和返修，降低板卡验证的实施门槛；
 2. **配置不错** —— Cortex-A7 双核、单核 HiFi4 DSP、内置 128MB DDR3、3 个 ADC、2 个 DAC、2 路 I2S/PCM、MIPI DSI 显示输出、集成音频 codec。
 
 数据手册：https://linux-sunxi.org/images/7/73/T113-s3_datasheet_v1.6.pdf
@@ -269,7 +269,7 @@ Two parts of the board need USB: a firmware/ADB port and a power port. Common US
 
 - **USB10 → USB0 (OTG)**: firmware burning and ADB debugging. VBUS = VIN5V (debug supply).
 - **USB9 → USB1 (Host)**: reserved for future USB functions; its VBUS is the main **5 V** supply.
-- **CC1 / CC2 each use a 5.1 kΩ pull-down to ground (R141/R142, R113/R114)**. As a USB-IF UFP/device that draws power, a 5.1 kΩ Rd on CC identifies the device and its power capability; a host/DFP would instead pull CC up to VBUS. These resistors are also required for PD power negotiation.
+- **CC1 / CC2 each use a 5.1 kΩ pull-down to ground (R141/R142, R113/R114)** to advertise sink attachment. The documented input is 5 V. Rd resistors alone do not implement USB Power Delivery negotiation or establish support for higher input voltages.
 - The two VBUS paths are OR-ed through **Schottky diodes D22 / D23 (LMBR240FT1G, SOD-123FL)** to isolate the supplies and prevent back-powering the host PC. Selection: low forward voltage Vf (less loss) and If ≥ the maximum system current (e.g. 2 A).
 - USB data pairs are protected by ESD5451N TVS arrays (U33–U36).
 - A power indicator LED (LED3 + 10 kΩ R115) shows power is present.
@@ -280,7 +280,7 @@ Two parts of the board need USB: a firmware/ADB port and a power port. Common US
 
 - **USB10 接 USB0（OTG）**：烧录与 ADB 调试，VBUS 为 VIN5V（调试供电）；
 - **USB9 接 USB1（Host）**：预留扩展其它 USB 功能，VBUS 为**主供电 5V**；
-- **CC1/CC2 各用 5.1kΩ 电阻接地（R141/R142、R113/R114）**：作为从机取电时，CC 接 5.1kΩ 下拉用于设备识别，也是 PD 快充的 USB-IF 规定；做主机时则上拉到 VBUS；
+- **CC1/CC2 各用 5.1kΩ 电阻接地（R141/R142、R113/R114）**：下拉电阻用于声明取电端连接，当前文档的输入为 5V。仅有 Rd 电阻不构成 USB PD 协商能力，也不能据此宣称支持更高输入电压；
 - 两路 VBUS 通过 **肖特基二极管 D22/D23（LMBR240FT1G，SOD-123FL）串联隔离**，避免外部供电倒灌电脑；选型看正向压降 Vf 越低越好、电流 If ≥ 系统最大电流（如 2A）；
 - USB 数据线用 ESD5451N（U33–U36）做静电保护；
 - 电源指示灯 LED3 + 10kΩ R115，方便判断是否通电。
@@ -336,7 +336,7 @@ T113 内置 6 组 UART，**UART0 默认用于 Debug**（可软件修改；IO 映
 
 A classic electret-condenser microphone biasing circuit is used, with the GMI4015P-2C-42dB mic (LCSC **C233292**, MIC2).
 
-- **C46 / C47 (100 nF)** — DC-blocking / AC-coupling caps. 100 nF has negligible impedance across 20 Hz–20 kHz (~1.6 Ω at 1 kHz), avoiding audio attenuation.
+- **C46 / C47 (100 nF)** — DC-blocking / AC-coupling caps. At 1 kHz, the capacitive reactance of 100 nF is approximately 1.59 kΩ: Xc = 1/(2πfC). The resulting high-pass response depends on the surrounding input impedance and must be evaluated for the actual signal chain.
 - **R27 (2 kΩ) / R34 (1 kΩ)** — MIC bias from AVCC. R27 sets the bias current and therefore sensitivity: too large gives too small current and low output level (weak sounds are lost as noise); too small raises noise. 2 kΩ is the usual value; 1 kΩ gives higher sensitivity.
 - **C87 (100 pF)** — differential-mode high-frequency noise filter (>10 MHz switch/crosstalk noise sees low impedance and is shorted).
 - **R148 (75 Ω) + C143 (10 µF)** — RC low-pass on the AVCC supply, blocking switching-noise and clock interference into the mic chain.
@@ -346,7 +346,7 @@ A classic electret-condenser microphone biasing circuit is used, with the GMI401
 
 参考经典驻极体电容麦电路，麦克风为 GMI4015P-2C-42dB（**C233292**，MIC2）：
 
-- **C46/C47（100nF）**：隔直通交，对 20Hz–20kHz 音频阻抗足够低（1kHz 时约 1.6Ω），避免信号衰减；
+- **C46/C47（100nF）**：隔直通交，100nF 在 1kHz 时容抗约为 1.59kΩ，计算式为 Xc=1/(2πfC)。高通响应取决于周边输入阻抗，需按实际信号链评估；
 - **R27（2kΩ）/R34（1kΩ）**：由 AVCC 提供偏置；R27 影响偏置电流即灵敏度——过大会使输入电流过小、输出电平偏低、小声被当噪声丢弃；一般取 2kΩ，高灵敏度可选 1kΩ；
 - **C87（100pF）**：滤除信号线间差模高频噪声（对 >10MHz 呈低阻短路）；
 - **R148（75Ω）+ C143（10µF）**：AVCC 电源 RC 低通，阻隔开关电源噪声与数字时钟干扰；
