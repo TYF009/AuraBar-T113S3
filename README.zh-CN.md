@@ -54,7 +54,7 @@ AuraBar 为值得持续关注的信息提供独立的交互入口。T113-S3 Linu
 
 主控为全志 T113-S3，片内 128 MB DDR3；W25N01 SPI NAND 提供存储，MIPI DSI、I²C 触摸与 PWM 背光构成交互链路，SoC codec 与 LM4871 提供音频基础。RTL8723DS 提供硬件连接能力，已验证的电脑联动使用 USB10。
 
-蓝牙音频、BLE Mesh 控制和 Wi-Fi 传输验收有独立状态，硬件接线不等于软件功能已启用。[设计总览](docs/hardware/README.md)、[逐模块电路说明](hardware/docs/hardware-design-guide.md)和[接口表](docs/hardware/interfaces.md)说明最终工程与设计取舍。
+蓝牙音频、BLE Mesh 控制和 Wi-Fi 传输验收有独立状态，硬件接线不等于软件功能已启用。[硬件设计指南：产品优势、选型思路与逐模块讲解](docs/hardware/README.md)。
 
 ## 按目标进入文档
 

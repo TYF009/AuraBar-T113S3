@@ -10,7 +10,7 @@ Schematic pages: T113S3 · NET · POWER · CONNECT · AUDIO · FLASH · DISPLAY
 > **Revision notes / 版本迭代说明**
 > The final BOM/PDF supersedes a few early reference screenshots: the amplifier is **LM4871** (not LM4890S), the backlight boost is **MT9201** (not SY7200AABC), and all four power rails use **SY8088AAC** (the early 1.8 V rail used an XC6206 LDO). This guide describes the final design.
 >
-> 最终 BOM 与原理图以本指南为准：功放最终为 **LM4871**（早期截图为 LM4890S），背光升压为 **MT9201**（早期框图为 SY7200AABC），四路电源全部采用 **SY8088AAC**（早期 1.8V 用 XC6206 LDO）。
+> 本指南按最终 BOM 与原理图校对：功放最终为 **LM4871**（早期截图为 LM4890S），背光升压为 **MT9201**（早期框图为 SY7200AABC），四路电源全部采用 **SY8088AAC**（早期 1.8V 用 XC6206 LDO）。核对器件与连线时以最终 BOM 和原理图为准。产品设计思路见[硬件设计指南](../../docs/hardware/README.md)。
 
 ---
 

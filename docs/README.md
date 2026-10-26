@@ -7,7 +7,7 @@ Choose an entry by the job you need to do. The source preview is 0.4.0-alpha.2; 
 | Customer or integration partner | [Product scope](product/README.md) | [Capabilities](product/status.md), [roadmap](product/roadmap.md) |
 | Device user | [Quick start](guides/quickstart.md) | [Install/recover](guides/installation.md), [troubleshoot](guides/troubleshooting.md) |
 | Software developer | [Development](development/README.md) | [Architecture](architecture/README.md), [protocol](architecture/task-protocol.md), [validation](testing/README.md) |
-| Hardware developer | [Design overview](hardware/README.md) | [Circuits](../hardware/docs/hardware-design-guide.md), [interfaces](hardware/interfaces.md) |
+| Hardware developer | [Hardware design guide / 硬件设计指南](hardware/README.md) | [Circuits](../hardware/docs/hardware-design-guide.md), [interfaces](hardware/interfaces.md) |
 | Release maintainer | [Release catalog](releases/README.md) | [Release procedure](releases/process.md), [changelog](../CHANGELOG.md) |
 
 ## Evidence and source records
