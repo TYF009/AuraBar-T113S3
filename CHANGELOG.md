@@ -4,6 +4,10 @@ This log separates source changes from binary publication. The historical previe
 
 ## Unreleased — repository productization
 
+- Product-film and GIF showcase, refreshed bilingual landing pages, integration brief and reproduction workflow.
+- Removed the editable hardware author draft from the current public tree; retained illustrated engineering analysis and independently verified figure hashes.
+- Added a hardware author-draft publication guard and media integrity coverage. Software version and acceptance claims are unchanged.
+
 - Product-oriented English/Chinese entry points, classified concept assets and actual screenshots.
 - Product readiness, architecture/protocol, hardware, setup/recovery, development and release documentation.
 - Repository integrity/version checks, environment diagnostics and contribution templates.

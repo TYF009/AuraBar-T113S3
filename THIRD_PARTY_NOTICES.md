@@ -10,6 +10,7 @@ Repository component licenses are scoped in [LICENSE](LICENSE). They do not repl
 | Audio fixtures / synthesized textures | Project-generated regression tones and procedural output; not third-party music recordings |
 | Existing UI fonts/images/notification sound | Project-provided source assets; complete redistribution records are not yet collected |
 | Concept visuals | Generated with imagegen for this project, clearly classified in the [asset registry](assets/README.md) |
+| Product film / GIFs | AI concept renders, existing board captures, STEP-derived geometry and original synthesized score; [scene classifications](docs/product/demo.md). Rasterized system-font text; no font files distributed with the media. |
 | External enclosure | [Source reference](hardware/mechanical/README.md); original STL terms are not replaced by the electronics license |
 
 The [resource provenance record](software/resource-provenance.json) captures exact font hashes and embedded notices:

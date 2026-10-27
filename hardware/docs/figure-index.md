@@ -4,9 +4,9 @@ The original Word file contains 26 media files and 27 image placements: image4.p
 
 原始 Word 含 26 个媒体文件与 27 处图片引用，其中 image4.png 重复使用一次。每张独立图均按原始字节保留，并嵌入[双语电路手册](hardware-design-guide.md)。下表图号指 Word 媒体编号，不是引用次数。图片保留原始语言与标注。
 
-This index records provenance, not ownership of third-party illustrations. Existing licensing and source notices continue to apply. The source DOCX and final schematic PDF are unchanged.
+This index records provenance, not ownership of third-party illustrations. Existing licensing and source notices continue to apply. The editable author draft is not part of the current public distribution. Published figure hashes and the final schematic PDF remain verifiable without it.
 
-本索引记录来源，不据此认定第三方插图的所有权；原有许可与来源说明继续适用。原始 DOCX 与最终原理图 PDF 未修改。
+本索引记录来源，不据此认定第三方插图的所有权；原有许可与来源说明继续适用。作者可编辑原稿不属于当前公开交付资料；已发布图片的哈希和最终原理图 PDF 可独立校验。
 
 ## Word figures / Word 图片
 
@@ -61,4 +61,4 @@ The handbook also retains the existing architecture diagram, RTC pin detail, pow
 
 手册同时保留已有架构图、RTC 引脚细节、电源域副本、USB 连接器对比照片、指示灯与触摸参考。历史文件名不能确定版本状态，具体内容与备选方案在图注中说明。
 
-[Machine-readable hashes / 机器可读哈希清单](figure-provenance.json) · [Original Word / 原始 Word](hardware-design-guide-source.docx) · [Final PDF / 最终 PDF](../schematic/AuraBar-Schematic-v1.0.pdf)
+[Machine-readable hashes / 机器可读哈希清单](figure-provenance.json) · [Final PDF / 最终 PDF](../schematic/AuraBar-Schematic-v1.0.pdf)

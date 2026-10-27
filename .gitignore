@@ -54,3 +54,7 @@ codex-runs/
 
 # ---- 保留空目录占位 ----
 !**/.gitkeep
+
+# Authoring drafts are kept outside the public hardware tree
+/hardware/**/*.docx
+/hardware/**/*.doc

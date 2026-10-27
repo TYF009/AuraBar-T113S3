@@ -1,6 +1,4 @@
 {
-  "source": "hardware/docs/hardware-design-guide-source.docx",
-  "source_sha256": "84704ced6c9e245145f8635d979412f93a696683a48852b9a8953383bc40d3e3",
   "media_count": 26,
   "image_occurrences": 27,
   "figures": [
@@ -242,5 +240,6 @@
       }
     ]
   },
-  "unique_image_count": 26
+  "unique_image_count": 26,
+  "source_policy": "Author draft excluded from current public distribution; published figure bytes retain the previously recorded hashes."
 }

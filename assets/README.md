@@ -6,6 +6,7 @@ The [machine-readable manifest](manifest.json) records classification, provenanc
 |---|---|---|
 | `renders/` | AI-generated product concepts | Future industrial design and application scenarios; illustrative UI/data |
 | `screenshots/` | Actual board framebuffer | Recorded UI appearance; not proof of every physical interaction |
+| `demos/` | Product film, GIFs, cover and subtitles | Mixed evidence and concept media; see the [scene guide](../docs/product/demo.md) |
 | `engineering/` | Actual supplied CAD geometry rendered with illustrative materials | Geometric reference; not assembly/manufacturing acceptance |
 
 The three concept images were generated on 2026-10-26 using imagegen. The desktop image established the product language for the kitchen and vehicle images. Original PNG masters remain in the project production workspace; optimized WebP copies are used here. Temperature, charging and file-count displays are example data.

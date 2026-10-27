@@ -78,7 +78,7 @@ def check():
             continue
         if hashlib.sha256(target.read_bytes()).hexdigest() != asset['sha256']:
             errors.append(f'Asset digest mismatch: {asset["path"]}')
-        if asset.get('kind') not in ('concept', 'framebuffer', 'cad-render'):
+        if asset.get('kind') not in ('concept', 'framebuffer', 'cad-render', 'product-film', 'presentation', 'subtitle'):
             errors.append(f'Unclassified asset: {asset["path"]}')
     fonts = json.loads((ROOT / 'software/resource-provenance.json').read_text(encoding='utf-8'))['fonts']
     for font in fonts:

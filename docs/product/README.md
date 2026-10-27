@@ -21,4 +21,8 @@ The current product loop is specific: start a task on the computer, glance at it
 | Connected appliances/furniture | A compact reusable interaction surface | Hardware/UI foundation; device-specific adapters planned |
 | Auxiliary vehicle display | Information integrated into interior trim | Product concept; vehicle data and qualification not implemented |
 
+Start with the [product film](demo.md), [integration brief](integration-brief.md) and [reproduction guide](../guides/reproduce.md).
+
+The [product delivery review](repository-review.md) assesses the current repository and prioritizes the remaining release and deployment work.
+
 Read the [capability matrix](status.md), [roadmap](roadmap.md) and [architecture](../architecture/README.md).
