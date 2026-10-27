@@ -1,0 +1,31 @@
+1
+00:00:00,700 --> 00:00:06,700
+Your AI workflow. A glance away.
+
+2
+00:00:07,500 --> 00:00:13,700
+A dedicated place for task status, focus audio and native touch.
+
+3
+00:00:14,500 --> 00:00:21,700
+Run on your computer. Follow progress. Review the result.
+
+4
+00:00:22,500 --> 00:00:29,700
+Summary. Evidence. Next. Context for a human decision.
+
+5
+00:00:30,500 --> 00:00:37,700
+Local audio and ambient sound. Make room for focus.
+
+6
+00:00:38,500 --> 00:00:45,700
+Real PCB geometry. Embedded Linux. Display, audio and USB.
+
+7
+00:00:46,500 --> 00:00:53,700
+Connected living and auxiliary vehicle display: application concepts.
+
+8
+00:00:54,500 --> 00:00:59,300
+Explore the hardware. Try the software. Discover AuraBar.

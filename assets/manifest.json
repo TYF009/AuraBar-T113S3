@@ -51,6 +51,78 @@
       "source": "pcb-preview.png",
       "description": "Supplied STEP geometry, illustrative materials",
       "sha256": "05dd75788a96a283ad4aff2f6588bb2c55f8dd11b7c5962bab4d73845abbc9db"
+    },
+    {
+      "path": "assets/demos/AuraBar-01-Product-Hero.gif",
+      "kind": "presentation",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "5b99bf91adc41f4ce28940916724595cb137cdcd8d69872e805c04df3bbdeec5"
+    },
+    {
+      "path": "assets/demos/AuraBar-02-Task-Workflow.gif",
+      "kind": "presentation",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "2f5f4921dabd563a3be2d0da16370934c598e625d125ee05fd4bec54bb4ecb14"
+    },
+    {
+      "path": "assets/demos/AuraBar-03-Music-Focus.gif",
+      "kind": "presentation",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "d8ca073e68b0f254ca76aa314b231850a01cb13a57330b2621f9008ca9da8398"
+    },
+    {
+      "path": "assets/demos/AuraBar-04-Hardware.gif",
+      "kind": "presentation",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "5e6a5dea9bcffe2d404dc8c82d4f77343b203d6bf5d5da38e93928496c1d4d8a"
+    },
+    {
+      "path": "assets/demos/AuraBar-05-Application-Concepts.gif",
+      "kind": "presentation",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "d4dc4913eb3079dc019a95e4686ca7c8b9b35b12eee511cff89d77c8d6877c0c"
+    },
+    {
+      "path": "assets/demos/AuraBar-Product-Film-1080p.mp4",
+      "kind": "product-film",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "72a87f6407b2fe1d6341419a3bb68a91d70fe408d9ece3f7d904087813ba3a2d"
+    },
+    {
+      "path": "assets/demos/AuraBar-Product-Film.en.srt",
+      "kind": "subtitle",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "3e269d8752099a72c10f2f628861aeaafa90c056ae058330c2be998c4d88c4a9"
+    },
+    {
+      "path": "assets/demos/AuraBar-Product-Film.zh-CN.srt",
+      "kind": "subtitle",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "dfa84b649040332f97fe61f3914128a3d73556000e423903590db4cb6060feff"
+    },
+    {
+      "path": "assets/demos/AuraBar-YouTube-Cover.png",
+      "kind": "concept",
+      "source": "AuraBar product-film production v1",
+      "description": "See docs/product/demo.md for scene-specific evidence and concept classifications",
+      "date": "2026-10-27",
+      "sha256": "29ba364c9466ae88cda54af74ef5d11c6364b30bf350290f4bacf2c2479e6634"
     }
   ]
 }

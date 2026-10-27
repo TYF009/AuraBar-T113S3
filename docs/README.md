@@ -4,7 +4,8 @@ Choose an entry by the job you need to do. The source preview is 0.4.0-alpha.2; 
 
 | Reader | Start here | Continue with |
 |---|---|---|
-| Customer or integration partner | [Product scope](product/README.md) | [Capabilities](product/status.md), [roadmap](product/roadmap.md) |
+| Customer or integration partner | [Integration brief](product/integration-brief.md) · [Product film](product/demo.md) | [Capabilities](product/status.md), [roadmap](product/roadmap.md) |
+| Reproduction / 复现 | [Reproduction guide](guides/reproduce.md) | [Development](development/README.md), [hardware](hardware/README.md) |
 | Device user | [Quick start](guides/quickstart.md) | [Install/recover](guides/installation.md), [troubleshoot](guides/troubleshooting.md) |
 | Software developer | [Development](development/README.md) | [Architecture](architecture/README.md), [protocol](architecture/task-protocol.md), [validation](testing/README.md) |
 | Hardware developer | [Hardware design guide / 硬件设计指南](hardware/README.md) | [Circuits](../hardware/docs/hardware-design-guide.md), [interfaces](hardware/interfaces.md) |

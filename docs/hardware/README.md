@@ -125,7 +125,6 @@ The repository does not yet contain a complete manufacturing release with verifi
 | Final schematic / 最终原理图 | [Seven-page PDF / 七页 PDF](../../hardware/schematic/AuraBar-Schematic-v1.0.pdf) |
 | Procurement / 采购 | [BOM spreadsheet / 表格](../../hardware/bom/AuraBar-BOM-v1.0.xlsx) · [CSV](../../hardware/bom/AuraBar-BOM-v1.0.csv) |
 | Connectivity evidence / 连接依据 | [Netlist / 网表](../../hardware/schematic/netlist.net) · [DXF sheets / 图页](../../hardware/schematic/dxf/) |
-| Original narrative / 原始说明 | [Word document / Word 文档](../../hardware/docs/hardware-design-guide-source.docx) |
 | Wiring and mechanics / 接线与结构 | [Interface map / 接口表](interfaces.md) · [Mechanical references / 机械参考](../../hardware/mechanical/README.md) |
 
 Hardware licensing follows [CERN-OHL-S-2.0](../../hardware/LICENSE). Third-party material terms remain in the [provenance and notices](../../THIRD_PARTY_NOTICES.md).

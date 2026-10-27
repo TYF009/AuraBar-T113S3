@@ -14,7 +14,7 @@ This handbook explains the AuraBar board from requirements through component sel
 | Sheets / 图页 | T113S3 · NET · POWER · CONNECT · AUDIO · FLASH · DISPLAY |
 | Input / 输入 | Regulated 5 V USB / 稳压 5 V USB |
 | Source images / 原始图片 | 26 unique Word images, 27 placements; one reused image / 26 张独立图，27 处引用，其中一张重复 |
-| Evidence / 依据 | [PDF](../schematic/AuraBar-Schematic-v1.0.pdf), [BOM](../bom/AuraBar-BOM-v1.0.csv), [netlist](../schematic/netlist.net), [original Word](hardware-design-guide-source.docx) |
+| Evidence / 依据 | [PDF](../schematic/AuraBar-Schematic-v1.0.pdf), [BOM](../bom/AuraBar-BOM-v1.0.csv), [netlist](../schematic/netlist.net) |
 
 **Reading the figures.** “Original note” means a preserved historical illustration; its designators or alternatives can differ from the final export. “Final sheet” means a raster preview of the repository PDF, with the vector PDF linked for full-detail inspection. Text and callouts inside original images retain their source language. See the [figure index and SHA-256 mapping](figure-index.md) for complete coverage.
 
@@ -573,7 +573,6 @@ This register makes interpretation changes explicit. Source files and embedded i
 - [Final schematic PDF / 最终原理图](../schematic/AuraBar-Schematic-v1.0.pdf)
 - [BOM spreadsheet / BOM 表格](../bom/AuraBar-BOM-v1.0.xlsx) and [CSV](../bom/AuraBar-BOM-v1.0.csv)
 - [Netlist / 网表](../schematic/netlist.net) and [DXF sheets / DXF 图页](../schematic/dxf/)
-- [Original Word source / 原始 Word](hardware-design-guide-source.docx)
 - [Figure index / 图像索引](figure-index.md) and [machine-readable provenance / 来源清单](figure-provenance.json)
 - [Interface map / 接口表](../../docs/hardware/interfaces.md) and [mechanical references / 机械参考](../mechanical/README.md)
 - [Hardware license / 硬件许可](../LICENSE) and [third-party notices / 第三方说明](../../THIRD_PARTY_NOTICES.md)

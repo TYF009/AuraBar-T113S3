@@ -1,17 +1,11 @@
-"""Verify original Word figure preservation and final schematic preview integrity."""
+"""Verify public hardware figures without distributing private authoring drafts."""
 import hashlib
 import json
 from pathlib import Path
 import re
 import sys
-import xml.etree.ElementTree as ET
-import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-NS = {
-    'a': 'http://schemas.openxmlformats.org/drawingml/2006/main',
-    'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
-}
 
 
 def digest(data):
@@ -33,36 +27,25 @@ def check():
             raise ValueError(f'Path outside repository: {relative}')
         return path
 
-    source = resolve(manifest['source'])
-    if digest(source.read_bytes()) != manifest['source_sha256']:
-        errors.append('Original DOCX hash differs from figure provenance')
-    with zipfile.ZipFile(source) as archive:
-        media = {name for name in archive.namelist() if name.startswith('word/media/')}
-        if len(media) != manifest['media_count']:
-            errors.append('Word media count mismatch')
-        rels = {rel.attrib['Id']: rel.attrib['Target'] for rel in ET.fromstring(archive.read('word/_rels/document.xml.rels'))}
-        document = ET.fromstring(archive.read('word/document.xml'))
-        placements = [
-            'word/' + rels[blip.attrib['{' + NS['r'] + '}embed']]
-            for blip in document.findall('.//a:blip', NS)
-            if '{' + NS['r'] + '}embed' in blip.attrib
-        ]
-        records = manifest['figures']
-        if placements != [record['docx_media'] for record in records]:
-            errors.append('Word placement order differs from provenance')
-        if len(placements) != manifest['image_occurrences']:
-            errors.append('Word placement count mismatch')
-        if media != {record['docx_media'] for record in records}:
-            errors.append('Original Word media missing from provenance')
-        for record in records:
-            path = resolve(record['repository_image'])
-            original = archive.read(record['docx_media'])
-            if digest(original) != record['sha256'] or path.read_bytes() != original:
-                errors.append(f'Original figure not preserved: {record["docx_media"]}')
-            if path not in references:
-                errors.append(f'Original figure not embedded in handbook: {path.name}')
-        if len({record['sha256'] for record in records}) != manifest['unique_image_count']:
-            errors.append('Unique Word image count mismatch')
+    for path in (ROOT / 'hardware').rglob('*'):
+        if path.is_file() and path.suffix.lower() in ('.doc', '.docx'):
+            errors.append(f'Authoring draft must stay outside public hardware: {path.relative_to(ROOT)}')
+    records = manifest['figures']
+    media = {record['docx_media'] for record in records}
+    if len(media) != manifest['media_count']:
+        errors.append('Published source-figure count mismatch')
+    if len(records) != manifest['image_occurrences']:
+        errors.append('Published figure placement count mismatch')
+    if [record['order'] for record in records] != list(range(1, len(records) + 1)):
+        errors.append('Published figure order mismatch')
+    for record in records:
+        path = resolve(record['repository_image'])
+        if digest(path.read_bytes()) != record['sha256']:
+            errors.append(f'Published figure hash mismatch: {path.name}')
+        if path not in references:
+            errors.append(f'Published figure not embedded in handbook: {path.name}')
+    if len({record['sha256'] for record in records}) != manifest['unique_image_count']:
+        errors.append('Unique published image count mismatch')
     pdf = manifest['schematic_pdf']
     if digest(resolve(pdf['path']).read_bytes()) != pdf['sha256']:
         errors.append('Schematic PDF changed; regenerate/review its previews')
@@ -84,8 +67,8 @@ def check():
     if errors:
         print('\n'.join(errors), file=sys.stderr)
         return 1
-    print(f'Hardware sources verified: {len(media)} original Word images, '
-          f'{len(placements)} placements, {len(pages)} final sheets, '
+    print(f'Hardware sources verified: {len(media)} published source images, '
+          f'{len(records)} placements, {len(pages)} final sheets, '
           f'{len(illustrations)} embedded illustrations.')
     return 0
 
@@ -93,6 +76,6 @@ def check():
 if __name__ == '__main__':
     try:
         sys.exit(check())
-    except (OSError, ValueError, KeyError, zipfile.BadZipFile, ET.ParseError) as error:
+    except (OSError, ValueError, KeyError) as error:
         print(f'Hardware source verification failed: {error}', file=sys.stderr)
         sys.exit(1)
